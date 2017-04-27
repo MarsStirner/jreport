@@ -1,0 +1,1733 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
+<!-- 2017-03-07T12:56:40 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="epicrisis" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="0" isIgnorePagination="true" uuid="0eaaaa96-fab4-47fd-948a-50d9315c38ef">
+	<property name="ireport.zoom" value="1.0000000000000056"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="562"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/epicrisis"/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.11:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bin\hospital1_risar.xml"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/epicrisis_files/epicrisis_jrxml"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<subDataset name="mongo" uuid="5aa144dc-4adc-480d-a666-213acadfaf29">
+		<parameter name="code" class="java.lang.String" isForPrompting="false"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+	collectionName : $P{refbook},
+	findQuery : { code: $P{code} },
+	findFields : {
+		name: 1
+	},
+	rowsToProcess : 5,
+	limit : 1
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+		<field name="shorttype" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="action_id" class="java.lang.String" isForPrompting="false">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA[10442]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_host" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["10.1.2.11"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_port" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["27017"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_dbname" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["nvesta"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_user" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_pw" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+CONCAT_WS(" ", client.lastName, client.firstName, client.patrName) AS clientName,
+event.externalId AS cardNum,
+pregnancy_final.value AS pregnancyFinal,
+abort.value AS Abort,
+delivery_date.value AS deliveryDate,
+delivery_time.value AS deliveryTime,
+pregnancy_duration.value AS pregnancyDuration,
+death_date.value AS deathDate,
+death_time.value AS deathTime,
+reason_of_death.value AS deathReason,
+control_expert_conclusion.value AS deathConclusion,
+delivery_waters.value AS deliveryWaters,
+weakness.value AS weakness,
+perineal_tear.value AS perinealTear,
+poor_blood.value AS poorBlood,
+immaturity.value AS immaturity,
+pre_birth_delivery_waters.value AS prebirthWaters,
+meconium_colouring.value AS meconiumColouring,
+patologicsl_preliminal_period.value AS patologicalPreliminal,
+labor_anomalies.value AS laborAnomalies,
+chorioamnionit.value AS chorioamnionit,
+eclampsia.value AS eclampsia,
+funiculus.value AS funiculus,
+afterbirth.value AS afterbirth,
+infections_during_birth.value AS infectionsDuringBirth,
+infections_after_birth.value AS infectionsAfterBirth,
+caul.value AS caul,
+calfbed.value AS calfbed,
+perineotomy.value AS perineotomy,
+secundines.value AS secundines,
+other_manipulations.value AS otherManipulations,
+caesarean_section.value AS caesareanSection,
+obstetrical_forceps.value AS obstetricalForceps,
+vacuum_extraction.value AS vacuum_extraction,
+indication.value AS indication,
+specialities.value AS specialities,
+anesthetization.value AS anesthetization,
+hysterectomy.value AS hysterectomy,
+embryotomy.value AS embryotomy,
+operationComplication.diag_list AS operationComplication,
+pregnancy_speciality.value AS pregnancySpeciality,
+help.value AS help,
+org.shortName AS LPUshortName,
+afterbirth_features.value AS afterbirthFeatures
+
+
+
+FROM Action AS epicrisis
+
+LEFT JOIN Event as event
+ON epicrisis.event_id = event.id
+
+LEFT JOIN Client AS client
+ON event.client_id = client.id
+
+
+-- Исход беременности
+LEFT JOIN ActionProperty_ExtRef pregnancy_final ON pregnancy_final.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'pregnancy_final'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+
+-- Аборт
+LEFT JOIN ActionProperty_ExtRef abort ON abort.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'abort'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+
+-- Дата родов
+LEFT JOIN ActionProperty_Date delivery_date ON delivery_date.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'delivery_date'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+
+-- Время родов
+LEFT JOIN ActionProperty_Time delivery_time ON delivery_time.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'delivery_time'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+
+-- Роды при сроке
+LEFT JOIN ActionProperty_Integer pregnancy_duration ON pregnancy_duration.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'pregnancy_duration'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+
+-- Дата смерти
+LEFT JOIN ActionProperty_Date death_date ON death_date.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'death_date'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+
+-- Время смерти
+LEFT JOIN ActionProperty_Time death_time ON death_time.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'death_time'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+
+-- Причина смерти
+LEFT JOIN ActionProperty_String reason_of_death ON reason_of_death.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'reason_of_death'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+
+-- Заключение ЛКК
+LEFT JOIN ActionProperty_String control_expert_conclusion ON control_expert_conclusion.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'control_expert_conclusion'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+
+
+-- Биологическая незрелость:
+LEFT JOIN ActionProperty_Integer immaturity ON immaturity.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'immaturity'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Излитие околоплодных вод:
+LEFT JOIN ActionProperty_ExtRef delivery_waters ON delivery_waters.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'delivery_waters'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Дородовое излитие вод:
+LEFT JOIN ActionProperty_Integer pre_birth_delivery_waters ON pre_birth_delivery_waters.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'pre_birth_delivery_waters'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Мекониальная окраска амниотических вод:
+LEFT JOIN ActionProperty_Integer meconium_colouring ON meconium_colouring.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'meconium_colouring'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Патологический прелиминарный период:
+LEFT JOIN ActionProperty_Integer patologicsl_preliminal_period ON patologicsl_preliminal_period.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'patologicsl_preliminal_period'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Аномалии родовой деятельности:
+LEFT JOIN ActionProperty_Integer labor_anomalies ON labor_anomalies.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'labor_anomalies'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Хориоамнионит:
+LEFT JOIN ActionProperty_Integer chorioamnionit ON chorioamnionit.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'chorioamnionit'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Слабость родовых сил:
+LEFT JOIN ActionProperty_ExtRef weakness ON weakness.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'weakness'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Разрыв промежностей (степень):
+LEFT JOIN ActionProperty_ExtRef perineal_tear ON perineal_tear.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'perineal_tear'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Анемия после родов:
+LEFT JOIN ActionProperty_Integer poor_blood ON poor_blood.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'poor_blood'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Нефропатия эклампсия в родах:
+LEFT JOIN ActionProperty_ExtRef eclampsia ON eclampsia.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'eclampsia'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Патология пуповины:
+LEFT JOIN ActionProperty_ExtRef funiculus ON funiculus.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'funiculus'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Патология плаценты:
+LEFT JOIN ActionProperty_ExtRef afterbirth ON afterbirth.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'afterbirth'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Инфекции в родах:
+LEFT JOIN ActionProperty_String infections_during_birth ON infections_during_birth.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'infections_during_birth'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Инфекции после родов:
+LEFT JOIN ActionProperty_String infections_after_birth ON infections_after_birth.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'infections_after_birth'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Вскрытие околоплодного пузыря
+LEFT JOIN ActionProperty_Integer caul ON caul.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'caul'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Ручное обследование матки
+LEFT JOIN ActionProperty_Integer calfbed ON calfbed.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'calfbed'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Эпизио перинеотомия
+LEFT JOIN ActionProperty_String perineotomy ON perineotomy.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'perineotomy'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Ручное выделение последа
+LEFT JOIN ActionProperty_Integer secundines ON secundines.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'secundines'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Другие пособия и манипуляции
+LEFT JOIN ActionProperty_String other_manipulations ON other_manipulations.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'other_manipulations'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Кесарево сечение:
+LEFT JOIN ActionProperty_ExtRef caesarean_section ON caesarean_section.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'caesarean_section'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Акушерские щипцы:
+LEFT JOIN ActionProperty_ExtRef obstetrical_forceps ON obstetrical_forceps.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'obstetrical_forceps'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Вакуум-экстракция:
+LEFT JOIN ActionProperty_Integer vacuum_extraction ON vacuum_extraction.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'vacuum_extraction'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Показания к операции:
+LEFT JOIN ActionProperty_ExtRef indication ON indication.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'indication'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Особенности операции:
+LEFT JOIN ActionProperty_ExtRef specialities ON specialities.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'specialities'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Обезболивание:
+LEFT JOIN ActionProperty_ExtRef anesthetization ON anesthetization.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'anesthetization'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Гистерэктомия:
+LEFT JOIN ActionProperty_ExtRef hysterectomy ON hysterectomy.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'hysterectomy'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Плодоразрушающие операции:
+LEFT JOIN ActionProperty_Integer embryotomy ON embryotomy.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'embryotomy'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Особенности течения беременности:
+LEFT JOIN ActionProperty_String pregnancy_speciality ON pregnancy_speciality.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'pregnancy_speciality'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Оказанная помощь:
+LEFT JOIN ActionProperty_String help ON help.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'help'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+LEFT JOIN ActionProperty_Organisation LPU ON LPU.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'LPU'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+LEFT JOIN Organisation org ON LPU.value = org.id
+-- Особенности течения послеродового периода:
+LEFT JOIN ActionProperty_String afterbirth_features ON afterbirth_features.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'afterbirth_features'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = epicrisis.id
+	LIMIT 1
+)
+-- Осложнения операции
+LEFT JOIN (
+	SELECT
+	GROUP_CONCAT(MKB.DiagID separator ", ") as diag_list,
+	_ap.action_id as action_id
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'operation_complication'
+	INNER JOIN ActionProperty_MKB _ap_v ON _ap_v.id = _ap.id
+	INNER JOIN MKB ON _ap_v.value = MKB.id
+	WHERE _ap.deleted = 0
+	GROUP BY _ap.action_id
+) as operationComplication ON operationComplication.action_id = epicrisis.id
+
+WHERE
+epicrisis.deleted = 0
+AND event.deleted = 0
+
+AND epicrisis.id = $P{action_id}
+
+LIMIT 1]]>
+	</queryString>
+	<field name="clientName" class="java.lang.String"/>
+	<field name="cardNum" class="java.lang.String"/>
+	<field name="pregnancyFinal" class="java.lang.String"/>
+	<field name="Abort" class="java.lang.String"/>
+	<field name="deliveryDate" class="java.sql.Date"/>
+	<field name="deliveryTime" class="java.sql.Time"/>
+	<field name="pregnancyDuration" class="java.lang.Integer"/>
+	<field name="deathDate" class="java.sql.Date"/>
+	<field name="deathTime" class="java.sql.Time"/>
+	<field name="deathReason" class="java.lang.String"/>
+	<field name="deathConclusion" class="java.lang.String"/>
+	<field name="deliveryWaters" class="java.lang.String"/>
+	<field name="weakness" class="java.lang.String"/>
+	<field name="perinealTear" class="java.lang.String"/>
+	<field name="poorBlood" class="java.lang.Integer"/>
+	<field name="immaturity" class="java.lang.Integer"/>
+	<field name="prebirthWaters" class="java.lang.Integer"/>
+	<field name="meconiumColouring" class="java.lang.Integer"/>
+	<field name="patologicalPreliminal" class="java.lang.Integer"/>
+	<field name="laborAnomalies" class="java.lang.Integer"/>
+	<field name="chorioamnionit" class="java.lang.Integer"/>
+	<field name="eclampsia" class="java.lang.String"/>
+	<field name="funiculus" class="java.lang.String"/>
+	<field name="afterbirth" class="java.lang.String"/>
+	<field name="infectionsDuringBirth" class="java.lang.String"/>
+	<field name="infectionsAfterBirth" class="java.lang.String"/>
+	<field name="caul" class="java.lang.Integer"/>
+	<field name="calfbed" class="java.lang.Integer"/>
+	<field name="perineotomy" class="java.lang.String"/>
+	<field name="secundines" class="java.lang.Integer"/>
+	<field name="otherManipulations" class="java.lang.String"/>
+	<field name="caesareanSection" class="java.lang.String"/>
+	<field name="obstetricalForceps" class="java.lang.String"/>
+	<field name="vacuum_extraction" class="java.lang.Integer"/>
+	<field name="indication" class="java.lang.String"/>
+	<field name="specialities" class="java.lang.String"/>
+	<field name="anesthetization" class="java.lang.String"/>
+	<field name="hysterectomy" class="java.lang.String"/>
+	<field name="embryotomy" class="java.lang.Integer"/>
+	<field name="operationComplication" class="java.lang.String"/>
+	<field name="pregnancySpeciality" class="java.lang.String"/>
+	<field name="help" class="java.lang.String"/>
+	<field name="LPUshortName" class="java.lang.String"/>
+	<field name="afterbirthFeatures" class="java.lang.String"/>
+	<variable name="MONGODB_CONNECTION" class="java.sql.Connection">
+		<variableExpression><![CDATA[$V{MONGODB_CONNECTION}]]></variableExpression>
+		<initialValueExpression><![CDATA[new com.jaspersoft.mongodb.connection.MongoDbConnection("mongodb://"+$P{mongo_host}+":"+$P{mongo_port}+"/"+$P{mongo_dbname}, $P{mongo_user}, $P{mongo_pw})]]></initialValueExpression>
+	</variable>
+	<detail>
+		<band height="135" splitType="Stretch">
+			<staticText>
+				<reportElement x="147" y="13" width="261" height="20" uuid="b59fde7d-91dc-4dec-81eb-9066f6cef831"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Эпикриз случая беременности]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="45" width="196" height="16" uuid="69928e28-303e-4ae3-a1eb-31c1cb9bb680"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Пациент:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="61" width="196" height="16" uuid="17e38ad1-887d-41c3-8aff-81e04ec83110"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Карта пациента:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="77" width="196" height="16" uuid="7df48e18-d9e4-4155-92de-afcd6b4e58bb"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[ЛПУ родоразрешения:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="93" width="196" height="26" uuid="01a3e674-3f67-4399-8732-207244484e88"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Особенности течения беременности:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="119" width="196" height="16" uuid="a1f3048b-9f74-4ec6-a9c5-adb7af2acdbf"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Оказанная помощь:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="45" width="359" height="16" uuid="e2e70fec-28d5-4931-a183-5d038e313638"/>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{clientName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="196" y="61" width="359" height="16" uuid="46c5810e-d651-43f3-b500-fa9c2f8b6c0f"/>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cardNum}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="196" y="77" width="359" height="16" uuid="dcfd7f7f-a020-42cb-ae6c-5991063da713"/>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LPUshortName}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="196" y="93" width="359" height="26" uuid="a420308e-ce98-42bf-90b6-1866ad72e9b2"/>
+				<textElement verticalAlignment="Bottom" markup="html">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pregnancySpeciality}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="196" y="119" width="359" height="16" uuid="c79380c1-7157-48df-844d-4131d76f5501"/>
+				<textElement verticalAlignment="Bottom" markup="html">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{help}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="44" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="12" width="555" height="16" uuid="785dfbd2-bb24-48b3-8b01-64ae32caf0cc"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Диагнозы:]]></text>
+			</staticText>
+			<frame>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="28" width="555" height="16" uuid="566a875b-c14e-4123-9199-8a794a6e0e57"/>
+				<staticText>
+					<reportElement x="0" y="0" width="196" height="16" uuid="a8f94fd7-5c88-40a5-9c23-8e1d7543e8a3"/>
+					<textElement verticalAlignment="Top">
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<text><![CDATA[Основной диагноз:]]></text>
+				</staticText>
+				<subreport>
+					<reportElement stretchType="RelativeToTallestObject" x="196" y="0" width="359" height="16" uuid="ad6ee13e-2e87-4cce-b4b0-c6d7776b45c5"/>
+					<subreportParameter name="action_id">
+						<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA["repo:epicrisis_maindiag.jrxml"]]></subreportExpression>
+				</subreport>
+			</frame>
+		</band>
+		<band height="16">
+			<frame>
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="555" height="16" uuid="e47e77c0-c791-4d47-bf29-354bafbe3023"/>
+				<staticText>
+					<reportElement x="0" y="0" width="196" height="16" uuid="68e49e5c-69b8-427b-8882-f09bef8cbd97"/>
+					<textElement verticalAlignment="Top">
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<text><![CDATA[Осложнения:]]></text>
+				</staticText>
+				<subreport>
+					<reportElement stretchType="RelativeToTallestObject" x="196" y="0" width="359" height="16" uuid="88730006-d03c-40cb-bd5a-54bac29f401f"/>
+					<subreportParameter name="action_id">
+						<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA["repo:epicrisis_diagcompl.jrxml"]]></subreportExpression>
+				</subreport>
+			</frame>
+		</band>
+		<band height="16">
+			<staticText>
+				<reportElement x="0" y="0" width="196" height="16" uuid="acbaf06e-2352-4826-a22d-5d1a7e26e102"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Сопутствующие заболевания:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="196" y="0" width="359" height="16" uuid="fda682c6-685b-4222-a3e5-42e10b6bfef2"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<subreport>
+				<reportElement stretchType="RelativeToTallestObject" x="196" y="0" width="359" height="16" uuid="2221b888-d5e7-4ee5-9d1f-c882403c7594"/>
+				<subreportParameter name="action_id">
+					<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["repo:epicrisis_diagother.jrxml"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="175">
+			<staticText>
+				<reportElement x="0" y="31" width="196" height="16" uuid="1bd1b1be-a237-47d1-ae3f-38c6ce754629"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Беременность закончилась:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="15" width="555" height="16" uuid="f15d67f4-acab-439c-beb1-2e6b0b6aacaf"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Исход беременности:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="47" width="196" height="16" uuid="6c2017a6-031d-4313-be50-c614b21a1251"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Вид аборта:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="63" width="196" height="16" uuid="3ea2aeeb-a4bc-47cf-978b-e6bbce80a1cc"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Дата, время:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="63" width="359" height="16" uuid="7a7b56ac-63c6-4dc8-9830-23c18c9ec5c2"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd MMM yyyy").format($F{deliveryDate})
++ "г., " +
+new SimpleDateFormat("HH:mm").format($F{deliveryTime})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="79" width="196" height="16" uuid="76610995-7598-40c7-8807-fb45be798448"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[При сроке беременности:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="79" width="359" height="16" uuid="f0280a42-ec79-4076-86e0-65cfbddc3f45"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pregnancyDuration}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="95" width="196" height="16" uuid="7c73b70a-73da-41e4-9216-efa065282271"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Смерть матери:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="95" width="359" height="16" uuid="7b577f5b-b128-4e21-926c-542343f1857d"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{deathDate} != null ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="111" width="196" height="16" uuid="c6585960-c0e1-49d6-a2a5-04fc7382bd7d"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Причина смерти матери:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="196" y="111" width="359" height="16" uuid="13a5fe72-c380-400e-9f91-4914d4858478"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{deathReason}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="127" width="196" height="16" uuid="ddb52d44-894f-4f6c-9536-1a171f3eb65b"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Дата, время смерти матери:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="196" y="127" width="359" height="16" uuid="cb0f03cc-31df-471c-a8c9-176a814f9628"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd MMM yyyy").format($F{deathDate})
++ "г., " +
+new SimpleDateFormat("HH:mm").format($F{deathTime})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="143" width="196" height="16" uuid="d6838f5b-7b9b-4af8-81ef-cd8a068cd96c"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Патологоанатомический диагноз:]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement x="196" y="31" width="359" height="16" uuid="382f7070-dad0-4989-8a77-7c4d66e5e1ea"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="db156f9a-cdf7-4004-8273-ac2477e91a68">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarPregnancy_Final"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{pregnancyFinal}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="e50d8d31-bb1a-45e4-bf18-6fbf6e924161"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="47" width="359" height="16" uuid="4e09a3a1-71d0-4d77-aaf6-d2b36598a32b"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="3571a5bd-694a-4c36-bbb5-75fc1706e9e6">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarAbort"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{Abort}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="95c97048-1f6c-44b3-a8d1-d6e03d1de63e"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<subreport>
+				<reportElement x="196" y="143" width="359" height="16" uuid="3643f6a7-7bb3-4447-8439-759dd719525e"/>
+				<subreportParameter name="action_id">
+					<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["repo:epicrisis_patdiag.jrxml"]]></subreportExpression>
+			</subreport>
+			<frame>
+				<reportElement positionType="Float" x="0" y="159" width="555" height="16" uuid="29286b27-8e06-4a79-8f80-36045ed1d42c"/>
+				<staticText>
+					<reportElement x="0" y="0" width="196" height="16" uuid="2d3562f2-bc31-4130-b696-0563491a8d21"/>
+					<textElement verticalAlignment="Top">
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<text><![CDATA[Заключение ЛКК:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="196" y="0" width="359" height="16" uuid="86e589cc-aac3-4b85-84d5-12ca03f390f1"/>
+					<textElement verticalAlignment="Top" markup="html">
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{deathConclusion}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+		<band height="593" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="216" width="196" height="16" uuid="29fb58e6-3bf2-4840-8c97-a9dd34e6e99d"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Анемия после родов (Hb<110 г/л):]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="120" width="196" height="16" uuid="e38dd698-8455-49d8-92f2-bc5415ef3155"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Разрыв промежностей (степень):]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="296" width="196" height="16" uuid="57ad2929-4186-4be8-8032-2dfe14e69ac2"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Инфекции после родов:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="104" width="196" height="16" uuid="7753fc1a-2f71-47de-a925-35df9a94a181"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Слабость родовых сил:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="248" width="196" height="16" uuid="caf8e53f-ef56-4721-b8ca-47bc1662cc35"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Патология пуповины:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="280" width="196" height="16" uuid="3cbcfd95-90e5-4540-9893-c0efdd268ef8"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Инфекции в родах:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="264" width="196" height="16" uuid="445506eb-9372-4397-b572-aa1abb208f9a"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Патология плаценты:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="232" width="196" height="16" uuid="fc26b9a8-a1c3-40f7-aff7-2040a094116e"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Нефропатия/эклампсия в родах:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="13" width="555" height="16" uuid="6ee79ec1-f102-4fa7-a634-e5f1ba410bc5"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Роды]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="53" width="196" height="16" uuid="54201d8a-1b56-474f-a349-27a0d7863ccd"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Излитие околоплодных вод:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="196" y="280" width="359" height="16" uuid="01691526-54fc-4a29-9888-4cf1faef5e2b"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{infectionsDuringBirth}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="196" y="296" width="359" height="16" uuid="9251b0c2-6320-4509-b371-90aec8f45f1d"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{infectionsAfterBirth}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="196" y="216" width="359" height="16" uuid="05c0f859-1905-426b-8bf7-d17935bd3d22"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{poorBlood} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="196" y="53" width="359" height="16" uuid="9e006f17-5201-45c5-8cc5-ecdc9a95b0ff"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="55cabd56-da12-4713-85ee-21d59817a895">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarDelivery_Waters"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{deliveryWaters}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="e1f63736-3db6-4c9a-a6e6-51c77471a193"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="104" width="359" height="16" uuid="5f031fce-464c-434c-8f94-84a1814fe901"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="b4cc8e7c-25d7-4ef9-bdce-f96a978df720">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarWeakness"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{weakness}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="3ce703c8-5005-41ca-ba03-94206b5a42f0"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="120" width="359" height="16" uuid="7b0473ea-b3de-44a7-aefa-b8a60c6dccd5"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="8cd53e41-6a29-4bce-ba36-1a6865978db7">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbPerinealTear"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{perinealTear}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="98aadc7e-d3b3-4313-9a84-f09123a10ed7"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="232" width="359" height="16" uuid="f927e2b4-f7eb-434c-9b1f-7c1a43d9c01d"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="7c34577f-9a9a-42c0-b491-ecb1320d164b">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarEclampsia"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{eclampsia}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="ce9d5874-ef14-44a3-bc89-a59f9d45bb30"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="248" width="359" height="16" uuid="42d6cda3-2eb0-4995-a495-51b402c82a2b"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="ada0b7c0-cc41-4ec2-8369-7794c13feeaf">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarFuniculus"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{funiculus}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="98d05eb9-f87d-4a7b-b7b4-7cb0988648b3"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="264" width="359" height="16" uuid="03806da1-1914-492a-b269-684732ce76b9"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="be081347-d1d7-474e-bdc1-387b212df890">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarAfterbirth"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{afterbirth}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="306c0ac7-1c9f-4ea9-9614-33b28803d440"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<textField>
+				<reportElement x="196" y="340" width="359" height="16" uuid="13b02075-5c1a-46a4-ae95-4c910950df5f"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{caul} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="340" width="196" height="16" uuid="b5f0562e-b5ab-4b8b-a09e-fb93e21380db"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Вскрытие околоплодного пузыря:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="324" width="555" height="16" uuid="4d38bf99-5a92-4cb1-ab56-c37a71b3193e"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Пособия и манипуляции при родах]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="356" width="359" height="16" uuid="acc7f51b-b6c2-40db-9eb6-705715e65068"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{calfbed} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="356" width="196" height="16" uuid="e8ea3758-5ef3-49f8-914a-827818615935"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Ручное обследование матки:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="196" y="372" width="359" height="16" uuid="ce106e3a-3cf7-4ae3-a3ce-8d964e7717ff"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{perineotomy}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="372" width="196" height="16" uuid="de7b952c-0516-4aa9-8092-e296a17bf098"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Эпизио/перинеотомия:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="388" width="359" height="16" uuid="676b65a5-6ce1-4a99-b6e2-bcb829368901"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{secundines} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="388" width="196" height="16" uuid="aac2a562-d83f-4a60-8d2a-d47755c6ed6a"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Ручное выделение последа:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="196" y="404" width="359" height="16" uuid="9605c4af-44dc-42c7-a972-948200a5bab3"/>
+				<textElement verticalAlignment="Top" markup="html">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{otherManipulations}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="404" width="196" height="16" uuid="f70e9cb6-0311-4620-b328-2f3566afa677"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Другие пособия и манипуляции:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="449" width="196" height="16" uuid="566c3f2a-866b-479b-96c7-d982b0a5ea04"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Кесарево сечение:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="433" width="555" height="16" uuid="b4d9e140-a02a-42ef-a72f-27d8995286e6"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Операции при родах]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="465" width="196" height="16" uuid="a64a1108-5c94-4b7d-b4b6-2ad46920726d"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Акушерские щипцы:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="481" width="196" height="16" uuid="428b12e8-c300-4b6c-a2c5-0a0a4f50d529"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Вакуум-экстракция:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="481" width="359" height="16" uuid="f8389d3e-4440-42e6-b1d1-bffc93c6b91e"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{vacuum_extraction} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="497" width="196" height="16" uuid="59c7056e-33db-4b90-80a0-cc530a48e7b2"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Показания к операции:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="513" width="196" height="16" uuid="279241ed-3cfb-4004-8973-d6d85b2d33f9"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Особенности операции:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="529" width="196" height="16" uuid="20aaa623-b06a-4dec-a499-068489690cd6"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Обезболивание:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="545" width="196" height="16" uuid="642c3754-1dcf-44d2-86d7-6c38d1594926"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Гистерэктомия:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="561" width="196" height="16" uuid="16021f3b-ae95-4147-9546-0f27d6407ac3"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Осложнения операции:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="196" y="561" width="359" height="16" uuid="33379f2b-625d-4603-8ccf-ecfd990b3cf8"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{operationComplication}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="577" width="196" height="16" uuid="998aca6c-0518-4556-90d3-8e57f243d405"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Плодоразрушающие операции:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="577" width="359" height="16" uuid="6ccb2082-b532-4f81-9024-ed76712b34b1"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{embryotomy} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="196" y="449" width="359" height="16" uuid="990bb564-4174-442c-8bd3-756ccd80bca9"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="e87f96f4-e491-413d-af57-5be2fbc1c8d7">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarCaesarean_Section"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{caesareanSection}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="eddacbce-212e-4db3-b028-d787c435a643"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="465" width="359" height="16" uuid="871e0cf1-5c64-48d8-be3d-43882838ce36"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="f9a45972-37fd-4ccf-b93a-055cb564f45c">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarObstetrical_Forceps"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{obstetricalForceps}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="3aeaf27d-ad76-49b6-ad5d-384c49417bc8"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="497" width="359" height="16" uuid="51beaae9-992d-4ecb-9c8c-3abc6edbbb01"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="809475ea-cec7-4a77-bdc4-7fd4bf179e4d">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarIndication"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{indication}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="55289d46-739e-4890-8155-ae949d7b07c3"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="513" width="359" height="16" uuid="f46d1fd0-812a-4a20-b040-c3b8f0c1ecfe"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="8bb40944-179e-41f4-8b0f-cae6bd1fa339">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarSpecialities"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{specialities}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="d75f0894-007a-41a0-a06c-87ce5f3c9858"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="529" width="359" height="16" uuid="3c36feb8-8beb-45b7-8106-3b55b3034b78"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="ad17ed88-d6f7-4bfc-bfcf-c9ee1d35c79b">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarAnesthetization"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{anesthetization}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="317284c4-a339-494e-a4d5-439df9d306c8"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<componentElement>
+				<reportElement x="196" y="545" width="359" height="16" uuid="94a39d91-9c59-401e-8401-8867e21db00e"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="de8cb060-cbd4-41f8-b18f-1e6ed4da8117">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarHysterectomy"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{hysterectomy}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="359">
+						<textField>
+							<reportElement x="0" y="0" width="359" height="16" uuid="09f8ddb9-2302-4e74-9dc5-c830fd29ec70"/>
+							<textElement verticalAlignment="Top">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<staticText>
+				<reportElement x="0" y="29" width="196" height="24" uuid="6f939e95-e40f-4ce1-b691-5b8165de536b"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Биологическая незредость родовых путей в 40 недель]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="29" width="359" height="16" uuid="3672c0d7-fef8-4ae2-afd9-0c1588635eef"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{immaturity} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="69" width="196" height="35" uuid="ac6a5765-1656-4e2d-9f78-a0db3dc90024"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Дородовое излитие вод (при отсутствии родовой деятельности более 6 ч)	]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="69" width="359" height="16" uuid="dcba8de2-b3f2-4e56-b53d-145209b8ad33"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{prebirthWaters} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="196" y="136" width="359" height="16" uuid="5bb374e3-fece-43e0-ba29-039ffc141f43"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{meconiumColouring} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="136" width="196" height="24" uuid="70ceb8bd-ecda-468e-bfc7-d37c22637eac"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Мекониальная окраска амниотических вод]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="160" width="359" height="16" uuid="ebc60bd5-bfc8-4b00-943a-8c1bd807c60a"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{patologicalPreliminal} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="160" width="196" height="24" uuid="c1061d6a-f8da-4fe5-8bdb-49b5f49fb97e"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Патологический прелиминарный период	]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="184" width="196" height="16" uuid="06ffb3b2-948f-4db5-a98f-92413523590b"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Аномалии родовой деятельности	]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="184" width="359" height="16" uuid="16c77f00-6239-41c6-bb2c-41bdd3c442ad"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{laborAnomalies} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="200" width="196" height="16" uuid="f818716d-077d-4699-8b8f-ce371ff35793"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Хориоамнионит	]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="200" width="359" height="16" uuid="b40c75fb-df1c-48d3-ab04-a6defe4ff173"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{chorioamnionit} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="64">
+			<staticText>
+				<reportElement x="0" y="32" width="27" height="16" uuid="81e8d50e-dd83-4013-821a-94b235a54c39"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[№]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="16" width="555" height="16" uuid="2d4d7755-d3a7-4729-a53b-b047daadcc4c"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Сведения о новорожденных]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="27" y="32" width="52" height="16" uuid="9d7b2830-5b0c-466e-a8aa-8539a244ec29"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Живой]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="79" y="32" width="154" height="16" uuid="7cd32c57-41ca-4575-a86f-6e8bb289940e"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Дата, время рождения]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="233" y="32" width="31" height="16" uuid="93faf73d-4586-4099-b423-c9613379552d"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Пол]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="264" y="32" width="73" height="16" uuid="daf6b74c-e348-49d7-92a7-e22a99d41ba8"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Масса, г]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="337" y="32" width="77" height="16" uuid="0db4418b-ba60-4ce0-b4e7-ff1993009fee"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Длина, см]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="414" y="32" width="141" height="16" uuid="4ec61ba4-5463-437a-b458-1eca9ba70ba8"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Степень доношенности]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="48" width="27" height="16" uuid="c469a2ef-a411-43a4-a741-c592b08271c3"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="27" y="48" width="52" height="16" uuid="d754344c-ae27-49da-8759-756cd43bbebe"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="79" y="48" width="154" height="16" uuid="4915c3d1-0090-4e98-85fc-963d529d9d06"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="233" y="48" width="31" height="16" uuid="bbe55ab0-7d5b-4418-b1c2-e30bd2f67a34"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="264" y="48" width="73" height="16" uuid="2db81bcc-0898-469b-844b-7a67bd09a2d5"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="337" y="48" width="77" height="16" uuid="dbf98bb8-7f4e-4f0d-afe3-4e0753d3d3c4"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="414" y="48" width="141" height="16" uuid="2f58e0d2-51d8-41b7-8cc6-0c5356b06624"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="0" y="48" width="555" height="16" uuid="2d966892-5215-4073-851f-30c29a7a7249"/>
+				<subreportParameter name="action_id">
+					<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="MONGODB_CONNECTION">
+					<subreportParameterExpression><![CDATA[$V{MONGODB_CONNECTION}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["repo:epicrisis_children.jrxml"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="44">
+			<staticText>
+				<reportElement x="0" y="12" width="555" height="16" uuid="261beb38-803f-4955-bb77-dde016ac7d05"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Особенности течения послеродового периода]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="28" width="555" height="16" uuid="cb107b1b-4af9-4cf9-9ade-6d4bd5ff84da"/>
+				<textElement verticalAlignment="Bottom" markup="html">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{afterbirthFeatures}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

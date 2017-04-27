@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
+<!-- 2017-03-07T12:56:39 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="epicrisis_maindiag" language="groovy" pageWidth="377" pageHeight="32" columnWidth="377" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b3435ef1-7c27-458e-90d0-2f657514f975">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.13:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/epicrisis_files/epicrisis_maindiag.jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/epicrisis"/>
+	<parameter name="action_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT d_c.MKB,
+IF (d_c.diagnosis_description is not null, d_c.diagnosis_description, MKB.DiagName) as MKBdescription
+
+FROM Action a
+LEFT JOIN Action_Diagnosis a_d ON a.id = a_d.action_id
+LEFT JOIN rbDiagnosisKind d_k ON d_k.id = a_d.diagnosisKind_id
+LEFT JOIN rbDiagnosisTypeN d_t ON d_t.id = a_d.diagnosisType_id
+LEFT JOIN Diagnostic d_c ON  d_c.diagnosis_id = a_d.diagnosis_id
+LEFT JOIN MKB ON d_c.MKB = MKB.DiagID
+
+
+WHERE
+a.deleted != 1
+AND d_c.deleted != 1
+AND d_k.code = 'main'
+AND d_t.code = 'final'
+AND a.id = $P{action_id}
+
+GROUP BY d_c.MKB]]>
+	</queryString>
+	<field name="MKB" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="MKBdescription" class="java.lang.String"/>
+	<detail>
+		<band height="16" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="64" height="16" uuid="78aa017f-66d8-4eb7-969c-8ff2007ee779"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MKB}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToTallestObject" x="64" y="0" width="313" height="16" uuid="0bc0a9b6-85ce-4f2d-97e9-fae0850ba47f"/>
+				<textElement verticalAlignment="Top" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MKBdescription}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

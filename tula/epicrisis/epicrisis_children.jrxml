@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
+<!-- 2017-03-07T12:56:40 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="epicrisis_children" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="f39d7478-cf31-4ae9-9504-fa32893f22c5">
+	<property name="ireport.zoom" value="1.3310000000000008"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.13:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/epicrisis_files/epicrisis_children.jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/epicrisis"/>
+	<subDataset name="mongo" uuid="2eaea954-71d8-4ca5-b9f8-52cf9fd520c7">
+		<parameter name="code" class="java.lang.String" isForPrompting="false"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+	collectionName : $P{refbook},
+	findQuery : { code: $P{code} },
+	findFields : {
+		name: 1
+	},
+	rowsToProcess : 5,
+	limit : 1
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+		<field name="shorttype" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="action_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="MONGODB_CONNECTION" class="java.sql.Connection" isForPrompting="false"/>
+	<queryString>
+		<![CDATA[SELECT * FROM RisarEpicrisis_Children
+WHERE action_id = $P{action_id}]]>
+	</queryString>
+	<field name="id" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="action_id" class="java.lang.Integer">
+		<fieldDescription><![CDATA[{Action}]]></fieldDescription>
+	</field>
+	<field name="date" class="java.sql.Date">
+		<fieldDescription><![CDATA[Дата рождения или смерти]]></fieldDescription>
+	</field>
+	<field name="time" class="java.sql.Time">
+		<fieldDescription><![CDATA[Время рождения или смерти]]></fieldDescription>
+	</field>
+	<field name="sex" class="java.lang.Integer">
+		<fieldDescription><![CDATA[Пол]]></fieldDescription>
+	</field>
+	<field name="weight" class="java.lang.Integer">
+		<fieldDescription><![CDATA[Масса]]></fieldDescription>
+	</field>
+	<field name="length" class="java.lang.Integer">
+		<fieldDescription><![CDATA[Длина]]></fieldDescription>
+	</field>
+	<field name="maturity_rate_code" class="java.lang.String">
+		<fieldDescription><![CDATA[Степень доношенности ExtRb{rbRisarMaturity_Rate}]]></fieldDescription>
+	</field>
+	<field name="apgar_score_1" class="java.lang.Integer">
+		<fieldDescription><![CDATA[Оценка по Апгар на 1 минуту]]></fieldDescription>
+	</field>
+	<field name="apgar_score_5" class="java.lang.Integer">
+		<fieldDescription><![CDATA[Оценка по Апгар на 5 минуту]]></fieldDescription>
+	</field>
+	<field name="apgar_score_10" class="java.lang.Integer">
+		<fieldDescription><![CDATA[Оценка по Апгар на 10 минуту]]></fieldDescription>
+	</field>
+	<field name="alive" class="java.lang.Integer">
+		<fieldDescription><![CDATA[Живой]]></fieldDescription>
+	</field>
+	<field name="death_reasons" class="java.lang.String">
+		<fieldDescription><![CDATA[Причина смерти (временное поле)]]></fieldDescription>
+	</field>
+	<detail>
+		<band height="16" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="27" y="0" width="52" height="16" uuid="e65efb99-511d-485b-a337-bd86d053d4f2"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{alive} == 1 ? "да" : "нет")]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="79" y="0" width="154" height="16" uuid="5b8aacf1-e37f-4743-9a6f-55a3fc17de84"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd MMM yyyy").format($F{date})
++ "г., " +
+new SimpleDateFormat("HH:mm").format($F{time})]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="233" y="0" width="31" height="16" uuid="9c8da11b-46f2-44e2-8175-4bb62c63543c"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{alive} == 1 ? "М" : "Ж")]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="337" y="0" width="77" height="16" uuid="3344b874-9006-4057-a90e-c5d29ae7f1de"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{length}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="27" height="16" uuid="8b0d7e31-be0a-4423-8635-2ff19547c472"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="264" y="0" width="73" height="16" uuid="4986c5f5-de35-474b-a449-30766660cc24"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{weight}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="414" y="0" width="141" height="16" uuid="455c87b5-2c50-4a12-9219-1cac44b25e58"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement x="414" y="0" width="141" height="16" uuid="c0b5e41a-0a0c-4d75-afc2-b5943d0db60e"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="b99d2c76-3b88-4006-9915-e8f166675894">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarMaturity_Rate"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{maturity_rate_code}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="141">
+						<textField isBlankWhenNull="true">
+							<reportElement x="0" y="0" width="141" height="16" uuid="87bf36cf-dc87-4350-a9a1-d3fc26adcdc0"/>
+							<box leftPadding="5">
+								<topPen lineWidth="0.25"/>
+								<leftPen lineWidth="0.25"/>
+								<bottomPen lineWidth="0.25"/>
+								<rightPen lineWidth="0.25"/>
+							</box>
+							<textElement verticalAlignment="Bottom">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+		</band>
+	</detail>
+</jasperReport>
