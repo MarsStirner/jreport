@@ -1,0 +1,1320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
+<!-- 2017-04-26T20:27:02 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="first_checkup_subreport" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="83cfd67f-91ae-4ee3-8cef-f9629d974f44">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bin\hospital1_risar.xml"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.11:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/second_checkup_files/main_jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/second_checkup"/>
+	<style name="left_col" hTextAlign="Left" hImageAlign="Right" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8" isBold="true"/>
+	<style name="right_col" hTextAlign="Left" hImageAlign="Left" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8">
+		<paragraph leftIndent="0"/>
+	</style>
+	<style name="left_col_common" hTextAlign="Left" hImageAlign="Right" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8" isBold="false"/>
+	<style name="step_header" hTextAlign="Center" vTextAlign="Bottom" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<subDataset name="diagDataSet" uuid="6f5947c8-1819-4912-8fe0-f1a7029d2929">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bin\hospital1_risar.xml"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<parameter name="action_id" class="java.lang.String"/>
+		<parameter name="diagnosisKind_id" class="java.lang.String">
+			<parameterDescription><![CDATA[]]></parameterDescription>
+		</parameter>
+		<queryString>
+			<![CDATA[SELECT diag.action_id AS action_id, mkb.DiagID AS DiagID, mkb.DiagName AS DiagName, diagKind.diagnosisKind_id AS diagnosisKind_id 
+FROM Diagnostic AS diag
+LEFT JOIN Action_Diagnosis AS diagKind 
+ON diag.action_id = diagKind.action_id AND diag.diagnosis_id = diagKind.diagnosis_id
+LEFT JOIN MKB mkb ON diag.MKB = mkb.DiagID
+WHERE diag.action_id = $P{action_id} AND diagKind.diagnosisKind_id = $P{diagnosisKind_id}]]>
+		</queryString>
+		<field name="action_id" class="java.lang.Integer"/>
+		<field name="DiagID" class="java.lang.String"/>
+		<field name="DiagName" class="java.lang.String"/>
+		<field name="diagnosisKind_id" class="java.lang.Integer"/>
+	</subDataset>
+	<subDataset name="diagAssociated" uuid="e1733cd5-3a1a-4645-8c44-6e6f7397327c">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bin\hospital1_risar.xml"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<parameter name="action_id" class="java.lang.String"/>
+		<queryString>
+			<![CDATA[SELECT diag.action_id AS action_id, mkb.DiagID AS DiagID, mkb.DiagName AS DiagName, diagKind.diagnosisKind_id AS diagnosisKind_id 
+FROM Diagnostic AS diag
+LEFT JOIN Action_Diagnosis AS diagKind 
+ON diag.action_id = diagKind.action_id AND diag.diagnosis_id = diagKind.diagnosis_id
+LEFT JOIN MKB mkb ON diag.MKB = mkb.DiagID
+WHERE diag.action_id = $P{action_id} AND diagKind.diagnosisKind_id is null]]>
+		</queryString>
+		<field name="action_id" class="java.lang.Integer"/>
+		<field name="DiagID" class="java.lang.String"/>
+		<field name="DiagName" class="java.lang.String"/>
+		<field name="diagnosisKind_id" class="java.lang.Integer"/>
+	</subDataset>
+	<subDataset name="mongo" uuid="212f2efc-993a-4912-a9d9-46af307f519f">
+		<parameter name="code" class="java.lang.String" isForPrompting="false"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+  collectionName : $P{refbook},
+  findQuery : { code: $P{code} },
+  findFields : {
+    name: 1
+  },
+  rowsToProcess : 5,
+  limit : 1
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+		<field name="shorttype" class="java.lang.String"/>
+		<variable name="name" class="java.lang.String">
+			<variableExpression><![CDATA[$F{name}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="multipleCodes" uuid="3222d72e-a0e0-45cb-945e-8beb9875abcc">
+		<parameter name="codes" class="java.lang.String[]"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<parameter name="title" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+  collectionName : $P{refbook},
+  findQuery : { code: { $in: [$P!{codes}] }},
+  findFields : {
+    name: 1
+  },
+  rowsToProcess : 5
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="action_id" class="java.lang.Integer" isForPrompting="false">
+		<defaultValueExpression><![CDATA[10292]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_host" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["10.1.2.11"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_port" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["27017"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_dbname" class="java.lang.String" isForPrompting="false">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["nvesta"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_user" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_pw" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+externalia.value as externalia, -- Наружные половые органы
+vagina.value as vagina,
+cervix.value as cervix, -- Шейка матки
+cervix_free_input.value as cervix_free_input, -- Шейка матки. Другое
+cervix_length.value as cervix_length,
+cervical_canal.value as cervical_canal,
+cervical_canal_free_input.value as cervical_canal_free_input,
+cervix_consistency.value as cervix_consistency,
+cervix_position.value as cervix_position,
+cervix_maturity.value as cervix_maturity,
+body_of_womb.value as body_of_womb,
+body_of_womb_additional.value as body_of_womb_additional,
+appendages.value as appendages,
+appendages_increased.value as appendages_increased,
+appendages_right.value as appendages_right,
+appendages_right_increased.value as appendages_right_increased,
+parametrium.value as parametrium,
+features.value as features, -- Особенности
+vagina_secretion.value as vagina_secretion,
+urethra_secretion.value as urethra_secretion,
+cervical_canal_secretion.value as cervical_canal_secretion,
+onco_smear.value as onco_smear,
+pregnancy_week.value as pregnancy_week, -- Беременность (недель)
+pregnancy_continuation.value as pregnancy_continuation, -- Возможность сохранения беременности
+pregnancy_continuation_refusal.value as pregnancy_continuation_refusal, -- Отказ от прерывания
+craft.value as craft,
+next_date.value as next_date, -- Плановая дата следующей явки
+notes.value as notes, -- Примечания
+recommendations.value as recommendations, -- Рекомендации
+doctor.lastName as doctorLastName, -- Ф доктора
+doctor.firstName as doctorFirstName, -- И доктора
+doctor.patrName as doctorPatrName, -- О доктора
+fetus_first_movement_date.value as fetus_first_movement_date,
+fetus_movement.value as fetus_movement
+
+FROM Action a
+LEFT JOIN Person doctor ON doctor.id = a.person_id
+-- Шевеление
+LEFT JOIN ActionProperty_String fetus_movement ON fetus_movement.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'fetus_movement'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Дата первого шевеления
+LEFT JOIN ActionProperty_Date fetus_first_movement_date ON fetus_first_movement_date.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'fetus_first_movement_date'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Цервикальный канал. Другое
+LEFT JOIN ActionProperty_String cervical_canal_free_input ON cervical_canal_free_input.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'cervical_canal_free_input'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Придаток правый. До
+LEFT JOIN ActionProperty_Double appendages_right_increased ON appendages_right_increased.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'appendages_right_increased'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Придаток левый. До
+LEFT JOIN ActionProperty_Double appendages_increased ON appendages_increased.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'appendages_increased'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Тело матки. До
+LEFT JOIN ActionProperty_Double body_of_womb_additional ON body_of_womb_additional.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'body_of_womb_additional'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Шейка матки. Другое
+LEFT JOIN ActionProperty_String cervix_free_input ON cervix_free_input.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'cervix_free_input'
+  WHERE _ap.deleted = 0
+    AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Рекомендации
+LEFT JOIN ActionProperty_String recommendations ON recommendations.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'recommendations'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Примечания
+LEFT JOIN ActionProperty_String notes ON notes.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'notes'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Плановая дата следующей явки
+LEFT JOIN ActionProperty_Date next_date ON next_date.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'next_date'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Изменение условий труда
+LEFT JOIN ActionProperty_ExtRef craft ON craft.id = (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'craft'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Отказ от прерывания
+LEFT JOIN ActionProperty_Integer pregnancy_continuation_refusal ON pregnancy_continuation_refusal.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'pregnancy_continuation_refusal'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Возможность сохранения беременности
+LEFT JOIN ActionProperty_Integer pregnancy_continuation ON pregnancy_continuation.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'pregnancy_continuation'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Беременность (недель)
+LEFT JOIN ActionProperty_Integer pregnancy_week ON pregnancy_week.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'pregnancy_week'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Мазок на онкоцитологию
+LEFT JOIN ActionProperty_Integer onco_smear ON onco_smear.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'onco_smear'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Отделяемое из цервикального канала
+LEFT JOIN ActionProperty_Integer cervical_canal_secretion ON cervical_canal_secretion.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'cervical_canal_secretion'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+
+-- Отделяемое из уретры
+LEFT JOIN ActionProperty_Integer urethra_secretion ON urethra_secretion.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'urethra_secretion'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Отделяемое из влагалища
+LEFT JOIN ActionProperty_Integer vagina_secretion ON vagina_secretion.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'vagina_secretion'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Особенности
+LEFT JOIN ActionProperty_String features ON features.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'features'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Околоматочное пространство
+LEFT JOIN ActionProperty_ExtRef parametrium ON parametrium.id = (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'parametrium'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Придатки - правый
+LEFT JOIN (
+  SELECT id, GROUP_CONCAT(DISTINCT value) as value 
+  FROM ActionProperty_ExtRef 
+  GROUP BY id) appendages_right ON appendages_right.id = (
+    SELECT _ap.id
+    FROM ActionProperty _ap
+    INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'appendages_right'
+    WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+    AND _ap.action_id = a.id
+    LIMIT 1
+)
+-- Придатки - левый
+LEFT JOIN (
+  SELECT id, GROUP_CONCAT(DISTINCT value) as value 
+  FROM ActionProperty_ExtRef 
+  GROUP BY id) appendages ON appendages.id = (
+    SELECT _ap.id
+    FROM ActionProperty _ap
+    INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'appendages'
+    WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+    AND _ap.action_id = a.id
+    LIMIT 1
+)
+-- Тело матки
+LEFT JOIN (
+  SELECT id, GROUP_CONCAT(DISTINCT value) as value 
+  FROM ActionProperty_ExtRef 
+  GROUP BY id) body_of_womb ON body_of_womb.id = (
+    SELECT _ap.id
+    FROM ActionProperty _ap
+    INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'body_of_womb'
+    WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+    AND _ap.action_id = a.id
+    LIMIT 1
+)
+-- Зрелость шейки матки
+LEFT JOIN ActionProperty_ExtRef cervix_maturity ON cervix_maturity.id = (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'cervix_maturity'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Позиция шейки матки
+LEFT JOIN ActionProperty_ExtRef cervix_position ON cervix_position.id = (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'cervix_position'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Консистенция шейки матки
+LEFT JOIN ActionProperty_ExtRef cervix_consistency ON cervix_consistency.id = (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'cervix_consistency'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Цервикальный канал
+LEFT JOIN ActionProperty_ExtRef cervical_canal ON cervical_canal.id = (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'cervical_canal'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Длина шейки матки
+LEFT JOIN ActionProperty_ExtRef cervix_length ON cervix_length.id = (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'cervix_length'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Шейка матки
+LEFT JOIN (
+  SELECT id, GROUP_CONCAT(DISTINCT value) as value 
+  FROM ActionProperty_ExtRef 
+  GROUP BY id) cervix ON cervix.id = (
+    SELECT _ap.id
+    FROM ActionProperty _ap
+    INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'cervix'
+    WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+    AND _ap.action_id = a.id
+    LIMIT 1
+)
+-- Влагалище
+LEFT JOIN ActionProperty_ExtRef vagina ON vagina.id = (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'vagina'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Наружные половые органы
+LEFT JOIN ActionProperty_String externalia ON externalia.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'externalia'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+WHERE
+a.deleted = 0
+AND a.id = $P{action_id}
+LIMIT 1]]>
+	</queryString>
+	<field name="externalia" class="java.lang.String"/>
+	<field name="vagina" class="java.lang.String"/>
+	<field name="cervix" class="java.lang.String"/>
+	<field name="cervix_free_input" class="java.lang.String"/>
+	<field name="cervix_length" class="java.lang.String"/>
+	<field name="cervical_canal" class="java.lang.String"/>
+	<field name="cervical_canal_free_input" class="java.lang.String"/>
+	<field name="cervix_consistency" class="java.lang.String"/>
+	<field name="cervix_position" class="java.lang.String"/>
+	<field name="cervix_maturity" class="java.lang.String"/>
+	<field name="body_of_womb" class="java.lang.String"/>
+	<field name="body_of_womb_additional" class="java.lang.Double"/>
+	<field name="appendages" class="java.lang.String"/>
+	<field name="appendages_increased" class="java.lang.Double"/>
+	<field name="appendages_right" class="java.lang.String"/>
+	<field name="appendages_right_increased" class="java.lang.Double"/>
+	<field name="parametrium" class="java.lang.String"/>
+	<field name="features" class="java.lang.String"/>
+	<field name="vagina_secretion" class="java.lang.Integer"/>
+	<field name="urethra_secretion" class="java.lang.Integer"/>
+	<field name="cervical_canal_secretion" class="java.lang.Integer"/>
+	<field name="onco_smear" class="java.lang.Integer"/>
+	<field name="pregnancy_week" class="java.lang.Integer"/>
+	<field name="pregnancy_continuation" class="java.lang.Integer"/>
+	<field name="pregnancy_continuation_refusal" class="java.lang.Integer"/>
+	<field name="craft" class="java.lang.String"/>
+	<field name="next_date" class="java.sql.Date"/>
+	<field name="notes" class="java.lang.String"/>
+	<field name="recommendations" class="java.lang.String"/>
+	<field name="doctorLastName" class="java.lang.String"/>
+	<field name="doctorFirstName" class="java.lang.String"/>
+	<field name="doctorPatrName" class="java.lang.String"/>
+	<field name="fetus_first_movement_date" class="java.sql.Date"/>
+	<field name="fetus_movement" class="java.lang.String"/>
+	<variable name="MONGODB_CONNECTION" class="java.sql.Connection">
+		<variableExpression><![CDATA[$V{MONGODB_CONNECTION}]]></variableExpression>
+		<initialValueExpression><![CDATA[new com.jaspersoft.mongodb.connection.MongoDbConnection("mongodb://"+$P{mongo_host}+":"+$P{mongo_port}+"/"+$P{mongo_dbname}, $P{mongo_user}, $P{mongo_pw})]]></initialValueExpression>
+	</variable>
+	<variable name="anyFetus" class="java.lang.Boolean"/>
+	<detail>
+		<band height="12">
+			<staticText>
+				<reportElement style="step_header" positionType="Float" x="0" y="0" width="555" height="12" isRemoveLineWhenBlank="true" uuid="f7d8f301-49ff-4bec-b06f-fee6c3e4da83">
+					<printWhenExpression><![CDATA[($F{externalia} != null && $F{externalia} != "") ||
+($F{vagina} != null && $F{vagina} != "") ||
+($F{cervix} != null && $F{cervix} != "") ||
+($F{cervix_free_input} != null && $F{cervix_free_input} != "") ||
+($F{cervix_length} != null && $F{cervix_length} != "") ||
+($F{cervical_canal} != null && $F{cervical_canal} != "") ||
+($F{cervical_canal_free_input} != null && $F{cervical_canal_free_input} != "") ||
+($F{cervix_consistency} != null && $F{cervix_consistency} != "") ||
+($F{cervix_position} != null && $F{cervix_position} != "") ||
+($F{cervix_maturity} != null && $F{cervix_maturity} != "") ||
+($F{body_of_womb} != null && $F{body_of_womb} != "") ||
+($F{body_of_womb_additional} != null && $F{body_of_womb_additional} != "") ||
+($F{appendages} != null && $F{appendages} != "") ||
+($F{appendages_increased} != null && $F{appendages_increased} != "") ||
+($F{appendages_right} != null && $F{appendages_right} != "") ||
+($F{appendages_right_increased} != null && $F{appendages_right_increased} != "") ||
+($F{parametrium} != null && $F{parametrium} != "") ||
+($F{features} != null && $F{features} != "") ||
+($F{vagina_secretion} != null && $F{vagina_secretion} != "") ||
+($F{urethra_secretion} != null && $F{urethra_secretion} != "") ||
+($F{cervical_canal_secretion} != null && $F{cervical_canal_secretion} != "") ||
+($F{onco_smear} != null && $F{onco_smear} != "")]]></printWhenExpression>
+				</reportElement>
+				<text><![CDATA[Влагалищное исследование]]></text>
+			</staticText>
+		</band>
+		<band height="190" splitType="Immediate">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+			<frame>
+				<reportElement positionType="Float" x="0" y="110" width="555" height="10" isRemoveLineWhenBlank="true" uuid="9b50340a-00c4-4a99-b46a-7bcb844b37fa">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{appendages} != null || $F{appendages_right} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="5035610d-8866-494f-814e-819f95c36b9f"/>
+					<text><![CDATA[Придатки:]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="160" width="555" height="10" isRemoveLineWhenBlank="true" uuid="52936503-0715-411b-b25b-7771b5910e87">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{parametrium} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="393c2ef3-2950-4648-a2cc-afe0f52b69dd"/>
+					<text><![CDATA[Околоматочное пространство:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement x="197" y="0" width="358" height="10" uuid="5fab525f-50b7-48b9-9823-41ddf2f4e829"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="2044b9c2-18b7-456a-b69f-0b4da81cfa20">
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{parametrium}]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarParametrium"]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="7efa033e-31e8-4597-89cb-7c198f53e22f"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="170" width="555" height="10" isRemoveLineWhenBlank="true" uuid="42f522c3-7b26-4eb9-8c63-6e1effaf559f">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{features} != null && $F{features} != ""]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="28f408a4-10f8-4d6e-8bcc-e96554c200e5"/>
+					<text><![CDATA[Особенности:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="c0485eb4-686a-4125-8026-f2e9cb7a96b9"/>
+					<textElement markup="html"/>
+					<textFieldExpression><![CDATA[$F{features}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="180" width="555" height="10" isRemoveLineWhenBlank="true" uuid="3b203bac-0b7b-43d9-9116-7f1ce306e548">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{vagina_secretion} == 1 || $F{urethra_secretion} == 1 || $F{cervical_canal_secretion} == 1 || $F{onco_smear} == 1]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="c5ad43f9-5771-42e0-a912-d8525a012136"/>
+					<textElement verticalAlignment="Top"/>
+					<text><![CDATA[Взято на анализ:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="99b77236-bb3e-4737-b046-98b048ddb1f7"/>
+					<textFieldExpression><![CDATA[String.join(", ", Arrays.asList($F{vagina_secretion}  ?  "Отделяемое из влагалища" :  null, $F{urethra_secretion} ? "Отделяемое из уретры" : null, $F{cervical_canal_secretion} ? "Отделяемое из цервикального канала": null, $F{onco_smear} ? "Мазок на онкоцитологию": null).findAll())]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="0" width="555" height="10" isRemoveLineWhenBlank="true" uuid="75b315bf-161c-47e7-8bad-8677e4b4ad2c">
+					<property name="ShowOutOfBoundContent" value="true"/>
+					<printWhenExpression><![CDATA[$F{externalia} != null && $F{externalia} != ""]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="aaf93189-b3eb-427b-a3cb-9fd2800c863c"/>
+					<textElement>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<text><![CDATA[Наружные половые органы:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" stretchType="RelativeToTallestObject" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="15348860-323a-4cf6-854a-a6f4bbcf4e20"/>
+					<textElement markup="html"/>
+					<textFieldExpression><![CDATA[$F{externalia}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="10" width="555" height="10" isRemoveLineWhenBlank="true" uuid="f5784698-443a-471a-8676-103718b6aa0b">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{vagina} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="fbf6cbff-6f72-431c-81d6-586573c72f9d"/>
+					<text><![CDATA[Влагалище:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement positionType="Float" x="197" y="0" width="358" height="10" uuid="d2ced26b-f8ea-4e6c-a1d7-c2164a1be638"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="0a3d8f07-0550-419c-b375-6d313b93b4f0">
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{vagina}]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarVagina"]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" positionType="Float" x="0" y="0" width="357" height="10" uuid="fec8bfb3-ad5c-4993-b914-d69caaa87685"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="90" width="555" height="10" isRemoveLineWhenBlank="true" uuid="fb6a9b7f-1c15-4d87-9390-d19107309587">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{body_of_womb} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="72680720-e25e-4319-97de-27c1c4d48509"/>
+					<text><![CDATA[Тело матки:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" uuid="a915a2ce-3104-4ee4-be6f-44622521db1a"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="multipleCodes" uuid="68cfb0c9-a5f4-4f61-b44a-ec3ecb13b68a">
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarBody_Of_Womb"]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="codes">
+								<datasetParameterExpression><![CDATA["\""+$F{body_of_womb}.replace(",", "\",\"")+"\""]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="4e5cd240-a9ba-47ee-9f49-0bbebcee5862"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="120" width="555" height="10" isRemoveLineWhenBlank="true" uuid="98180287-9610-4520-ab04-7fc2b66f4177">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{appendages} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="a9dfcb27-5ff5-4555-8386-1c857691ed91"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<text><![CDATA[Левый:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" uuid="31e2826b-7723-4410-a8a3-1905e6b1c88f"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="multipleCodes" uuid="c9a6d5fe-cdaf-458f-8c5f-114a496dbdd0">
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarAppendages"]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="codes">
+								<datasetParameterExpression><![CDATA["\""+$F{appendages}.replace(",", "\",\"")+"\""]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="5790bd5e-e51a-4602-b051-1a85818d1388"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="140" width="555" height="10" isRemoveLineWhenBlank="true" uuid="9675bef8-8e93-4f3b-ae30-527a6dc368ec">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{appendages_right} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="6deefecd-9f41-4906-96a4-0c79b1bb3071"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<text><![CDATA[Правый:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" uuid="1e4ade9a-7276-4da7-bfd7-c237987ce3a0"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="multipleCodes" uuid="31b9a18c-a75b-4371-8daa-b5bec6998f9c">
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarAppendages"]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="codes">
+								<datasetParameterExpression><![CDATA["\""+$F{appendages_right}.replace(",", "\",\"")+"\""]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="4d316f4f-5267-4ce6-9186-6e4334c91454"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="20" width="555" height="70" isRemoveLineWhenBlank="true" uuid="db8e2dc5-ccaa-473d-916b-8b8bde55e3be">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{cervical_canal} != null || $F{cervix_consistency} != null || $F{cervix_length}  != null || $F{cervix_maturity} != null || $F{cervix_position} != null || $F{cervix}]]></printWhenExpression>
+				</reportElement>
+				<frame>
+					<reportElement positionType="Float" x="0" y="0" width="555" height="10" isRemoveLineWhenBlank="true" uuid="13a8ca98-e84d-419c-a6af-305fee7504e7">
+						<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					</reportElement>
+					<staticText>
+						<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="9b6972b4-1278-4d78-8f4f-69898a1807ef"/>
+						<text><![CDATA[Шейка матки:]]></text>
+					</staticText>
+					<componentElement>
+						<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" uuid="4ce18fed-f27a-4133-8be1-c2d769c7566d">
+							<printWhenExpression><![CDATA[$F{cervix} != null]]></printWhenExpression>
+						</reportElement>
+						<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+							<datasetRun subDataset="multipleCodes" uuid="78c7db27-4a50-4098-8af2-0c00a9dbf11f">
+								<datasetParameter name="refbook">
+									<datasetParameterExpression><![CDATA["refbook.rbRisarCervix"]]></datasetParameterExpression>
+								</datasetParameter>
+								<datasetParameter name="codes">
+									<datasetParameterExpression><![CDATA["\""+$F{cervix}.replace(",", "\",\"")+"\""]]></datasetParameterExpression>
+								</datasetParameter>
+								<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+							</datasetRun>
+							<jr:listContents height="10" width="358">
+								<textField>
+									<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="a0cb3197-7e06-49c7-807a-e8b6c919a3de"/>
+									<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+								</textField>
+							</jr:listContents>
+						</jr:list>
+					</componentElement>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="20" width="555" height="10" isRemoveLineWhenBlank="true" uuid="c855bdf0-9287-4e79-b698-2d49fb8b40dc">
+						<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+						<printWhenExpression><![CDATA[$F{cervix_length} != null]]></printWhenExpression>
+					</reportElement>
+					<staticText>
+						<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="5806cd8d-66f1-4687-991d-a2de2346a65b"/>
+						<text><![CDATA[длина:]]></text>
+					</staticText>
+					<componentElement>
+						<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" uuid="55faba79-ff8a-42f3-99a6-bb6d784effc2"/>
+						<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+							<datasetRun subDataset="mongo" uuid="6f7718ad-df61-4460-bc17-9bc717813acb">
+								<datasetParameter name="code">
+									<datasetParameterExpression><![CDATA[$F{cervix_length}]]></datasetParameterExpression>
+								</datasetParameter>
+								<datasetParameter name="refbook">
+									<datasetParameterExpression><![CDATA["refbook.rbRisarCervix_Length"]]></datasetParameterExpression>
+								</datasetParameter>
+								<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+							</datasetRun>
+							<jr:listContents height="10" width="358">
+								<textField>
+									<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="503ad858-7217-42c7-b18a-0c240b26c44d"/>
+									<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+								</textField>
+							</jr:listContents>
+						</jr:list>
+					</componentElement>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="40" width="555" height="10" isRemoveLineWhenBlank="true" uuid="61bf1293-5cd1-4f89-9fad-db1b539643db">
+						<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+						<printWhenExpression><![CDATA[$F{cervix_consistency} != null]]></printWhenExpression>
+					</reportElement>
+					<staticText>
+						<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="b289f67b-b67e-4965-87ed-c3bf38569603"/>
+						<text><![CDATA[консистенция:]]></text>
+					</staticText>
+					<componentElement>
+						<reportElement positionType="Float" x="197" y="0" width="358" height="10" uuid="99d8f882-d863-4b3a-835b-cbcf7983ddbf"/>
+						<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+							<datasetRun subDataset="mongo" uuid="4e744d73-4847-4fee-8499-80644535bda7">
+								<datasetParameter name="code">
+									<datasetParameterExpression><![CDATA[$F{cervix_consistency}]]></datasetParameterExpression>
+								</datasetParameter>
+								<datasetParameter name="refbook">
+									<datasetParameterExpression><![CDATA["refbook.rbRisarCervix_Consistency"]]></datasetParameterExpression>
+								</datasetParameter>
+								<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+							</datasetRun>
+							<jr:listContents height="10" width="358">
+								<textField>
+									<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="71ea7b39-03a0-4f4b-ae47-078d61c9e27a"/>
+									<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+								</textField>
+							</jr:listContents>
+						</jr:list>
+					</componentElement>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="50" width="555" height="10" isRemoveLineWhenBlank="true" uuid="a9b7ce3e-68a6-4b76-ae8c-94d3f5479139">
+						<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+						<printWhenExpression><![CDATA[$F{cervix_position} != null]]></printWhenExpression>
+					</reportElement>
+					<staticText>
+						<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="576526f0-f938-4ed5-acfd-952ca1eeb359"/>
+						<text><![CDATA[позиция:]]></text>
+					</staticText>
+					<componentElement>
+						<reportElement positionType="Float" x="197" y="0" width="358" height="10" uuid="55987456-1024-45e9-a34a-469482b4e7bb"/>
+						<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+							<datasetRun subDataset="mongo" uuid="a2bee521-a1da-4fbb-a50c-c233bf17c192">
+								<datasetParameter name="code">
+									<datasetParameterExpression><![CDATA[$F{cervix_position}]]></datasetParameterExpression>
+								</datasetParameter>
+								<datasetParameter name="refbook">
+									<datasetParameterExpression><![CDATA["refbook.rbRisarCervix_Position"]]></datasetParameterExpression>
+								</datasetParameter>
+								<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+							</datasetRun>
+							<jr:listContents height="10" width="358">
+								<textField>
+									<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="2b540eba-0c2e-4221-b228-7e6493e1d3a4"/>
+									<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+								</textField>
+							</jr:listContents>
+						</jr:list>
+					</componentElement>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="60" width="555" height="10" isRemoveLineWhenBlank="true" uuid="8c9b1960-7bd3-480b-af38-47a35a098307">
+						<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+						<printWhenExpression><![CDATA[$F{cervix_maturity} != null]]></printWhenExpression>
+					</reportElement>
+					<staticText>
+						<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="988c27fe-b85d-4bc2-a5c6-0e0e45215b3c"/>
+						<text><![CDATA[зрелость:]]></text>
+					</staticText>
+					<componentElement>
+						<reportElement positionType="Float" x="197" y="0" width="358" height="10" uuid="eec24c28-4a01-434f-af28-f2bb1b6354c1"/>
+						<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+							<datasetRun subDataset="mongo" uuid="4912458e-dc88-4ed2-b53f-2a0c18148085">
+								<datasetParameter name="code">
+									<datasetParameterExpression><![CDATA[$F{cervix_maturity}]]></datasetParameterExpression>
+								</datasetParameter>
+								<datasetParameter name="refbook">
+									<datasetParameterExpression><![CDATA["refbook.rbRisarCervix_Maturity"]]></datasetParameterExpression>
+								</datasetParameter>
+								<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+							</datasetRun>
+							<jr:listContents height="10" width="358">
+								<textField>
+									<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="c2f49166-1ed4-49cd-8c5c-2bb1074e1a40"/>
+									<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+								</textField>
+							</jr:listContents>
+						</jr:list>
+					</componentElement>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="10" width="555" height="10" isRemoveLineWhenBlank="true" uuid="182639d7-b150-48f8-9aba-5e372e7a2725">
+						<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+						<printWhenExpression><![CDATA[$F{cervix_free_input} != null || $F{cervix_free_input} != ""]]></printWhenExpression>
+					</reportElement>
+					<textField isBlankWhenNull="true">
+						<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="11bd4169-3514-41b0-abb6-6577bf9b12a2"/>
+						<textFieldExpression><![CDATA[$F{cervix_free_input}]]></textFieldExpression>
+					</textField>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="30" width="555" height="10" isRemoveLineWhenBlank="true" uuid="fdfcfbcf-e67d-4d4a-b79f-a3fea5d650db">
+						<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+						<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+						<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+						<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+						<printWhenExpression><![CDATA[$F{cervical_canal} != null]]></printWhenExpression>
+					</reportElement>
+					<staticText>
+						<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="f8916092-8eda-4c87-9142-5490d6336d2b"/>
+						<text><![CDATA[цервикальный канал:]]></text>
+					</staticText>
+					<componentElement>
+						<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" uuid="f897b864-6cc8-46e7-ad6e-6f6569ae86a8">
+							<printWhenExpression><![CDATA[$F{cervical_canal} != "other"]]></printWhenExpression>
+						</reportElement>
+						<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+							<datasetRun subDataset="mongo" uuid="172d959f-cd30-4595-88ae-baca89fccf71">
+								<datasetParameter name="code">
+									<datasetParameterExpression><![CDATA[$F{cervical_canal}]]></datasetParameterExpression>
+								</datasetParameter>
+								<datasetParameter name="refbook">
+									<datasetParameterExpression><![CDATA["refbook.rbRisarCervical_Canal"]]></datasetParameterExpression>
+								</datasetParameter>
+								<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+							</datasetRun>
+							<jr:listContents height="10" width="358">
+								<textField>
+									<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="422e8feb-404b-4aa2-bf76-bd72a4a8e1cd"/>
+									<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+								</textField>
+							</jr:listContents>
+						</jr:list>
+					</componentElement>
+					<textField isBlankWhenNull="true">
+						<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="addd31f4-d551-4bba-bf4c-075966a9fef7">
+							<printWhenExpression><![CDATA[$F{cervical_canal} == "other"]]></printWhenExpression>
+						</reportElement>
+						<textFieldExpression><![CDATA[$F{cervical_canal_free_input}]]></textFieldExpression>
+					</textField>
+				</frame>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="130" width="555" height="10" isRemoveLineWhenBlank="true" uuid="470e2ad9-347e-4a2a-8929-a580d9b8e5f7">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{appendages_increased} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="1a7e8a40-71db-4be8-9064-d0dfeb260698"/>
+					<text><![CDATA[до:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="7e8d4184-2728-4aef-a69d-2527df25cb43"/>
+					<textFieldExpression><![CDATA[$F{appendages_increased}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="150" width="555" height="10" isRemoveLineWhenBlank="true" uuid="6ab12a10-1558-4237-9a55-9a32c4418fe1">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{appendages_right_increased} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="23a1cf6e-2cb8-45a6-8328-4ae02966d523"/>
+					<text><![CDATA[до:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="93610419-791e-4298-9c5b-97b4087bd548"/>
+					<textFieldExpression><![CDATA[$F{appendages_right_increased}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="100" width="555" height="10" isRemoveLineWhenBlank="true" uuid="363523b5-6a91-4e17-a620-2fc0195ca76e">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{body_of_womb_additional} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="b9e2d613-b865-41cd-93c5-ecd3b6812ad9"/>
+					<text><![CDATA[увеличено до:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="3e875c25-00e7-4df4-8f96-42af439cfa3d"/>
+					<textFieldExpression><![CDATA[$F{body_of_womb_additional}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+		<band height="52">
+			<frame>
+				<reportElement positionType="Float" x="0" y="12" width="555" height="10" isRemoveLineWhenBlank="true" uuid="555f1f59-c8eb-40a8-9866-88639109f17b">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{fetus_first_movement_date} != null || $F{fetus_movement} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="2b111a39-8fb8-4b5c-ab73-477fad095c39"/>
+					<text><![CDATA[Шевеление плода:]]></text>
+				</staticText>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="22" width="555" height="10" isRemoveLineWhenBlank="true" uuid="a881f364-c3e1-4122-a294-92ab1d4cca7d">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{fetus_first_movement_date} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="37c02cc2-23e1-444c-84f9-351377fee76c"/>
+					<text><![CDATA[Дата первого шевеления:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="58a8900b-623b-4003-b7bb-ad321345420f"/>
+					<textFieldExpression><![CDATA[$F{fetus_first_movement_date}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="32" width="555" height="10" isRemoveLineWhenBlank="true" uuid="397bc86c-f2be-450b-ba02-0af88f418006">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{fetus_movement} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="6f5f643a-433f-491f-8382-de8ea9e5868e"/>
+					<text><![CDATA[Характер:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="75d93e50-0c11-4923-8c18-d3b6f3dea25c"/>
+					<textElement markup="html"/>
+					<textFieldExpression><![CDATA[$F{fetus_movement}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<subreport overflowType="Stretch">
+				<reportElement key="" positionType="Float" x="0" y="42" width="555" height="10" isRemoveLineWhenBlank="true" uuid="9e26d434-9028-4630-ba04-6b83e0506483">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<subreportParameter name="action_id">
+					<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="mongo_dbname">
+					<subreportParameterExpression><![CDATA[$P{mongo_dbname}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="mongo_host">
+					<subreportParameterExpression><![CDATA[$P{mongo_host}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="mongo_port">
+					<subreportParameterExpression><![CDATA[$P{mongo_port}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="mongo_pw">
+					<subreportParameterExpression><![CDATA[$P{mongo_pw}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="mongo_user">
+					<subreportParameterExpression><![CDATA[$P{mongo_user}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<returnValue subreportVariable="anyFetus" toVariable="anyFetus"/>
+				<subreportExpression><![CDATA["second_fetus_subreport.jrxml"]]></subreportExpression>
+			</subreport>
+			<textField isStretchWithOverflow="true" evaluationTime="Report" isBlankWhenNull="true">
+				<reportElement style="step_header" positionType="Float" x="0" y="0" width="555" height="12" isRemoveLineWhenBlank="true" uuid="e7e81752-efc6-43a7-98d5-78b079efb7da">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[($V{anyFetus} || $F{fetus_first_movement_date} || $F{fetus_movement}) ? "Данные плода" : "Данных о плоде нет"]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="12">
+			<staticText>
+				<reportElement style="step_header" positionType="Float" x="0" y="0" width="555" height="12" isRemoveLineWhenBlank="true" uuid="280b833e-3772-4d53-8eb5-2acd4791bf9a"/>
+				<text><![CDATA[Заключение]]></text>
+			</staticText>
+		</band>
+		<band height="110" splitType="Immediate">
+			<frame>
+				<reportElement positionType="Float" x="0" y="30" width="555" height="10" isRemoveLineWhenBlank="true" uuid="525a06a8-58e3-43a1-bf6e-c2f5bad37ac7">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{pregnancy_week} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="88f0c385-b60b-4c78-8362-2922dfce4b99"/>
+					<text><![CDATA[Срок берем.(нед.):]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" uuid="da07dcd1-1ee1-4a58-8dcb-17a069ca614b"/>
+					<textFieldExpression><![CDATA[$F{pregnancy_week}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="40" width="555" height="10" isRemoveLineWhenBlank="true" uuid="67fcc83f-fd6d-46a4-adde-0fe7dfbe9f92">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{pregnancy_continuation} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="fce91c7c-27cc-4ab0-b3f3-1f9d7932f7a5"/>
+					<text><![CDATA[Возможность сохран. берем-сти:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="7d5d2eb5-baf9-4b4b-b094-df90e49bed8b"/>
+					<textFieldExpression><![CDATA[$F{pregnancy_continuation} == 1 ? "Да" : "Нет"]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="50" width="555" height="10" isRemoveLineWhenBlank="true" uuid="a1b5b203-4986-49c7-a161-e0adc73fcc44">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{pregnancy_continuation_refusal} != null && $F{pregnancy_continuation} == 0]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="23812090-00ee-4a8d-ba1f-29d8036afa12"/>
+					<text><![CDATA[Отказ от прерывания:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="6c9d7b53-20f7-481a-8fc4-e70aa5f713d5"/>
+					<textFieldExpression><![CDATA[$F{pregnancy_continuation_refusal} == 1 ? "Да" : "Нет"]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="80" width="555" height="10" isRemoveLineWhenBlank="true" uuid="de5863b8-dbda-4888-bb40-58f78952e2ec">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{notes} != null && $F{notes} != ""]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="0f6cd76a-9a27-4b55-9470-024b9f7d1c22"/>
+					<text><![CDATA[Примечания:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="822edcd6-b2ce-4c5c-a318-43870f26d247"/>
+					<textElement markup="html"/>
+					<textFieldExpression><![CDATA[$F{notes}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="100" width="555" height="10" isRemoveLineWhenBlank="true" uuid="9dcfa1d2-ff69-4863-93e2-6c917f0ed76a">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{doctorFirstName} != null || $F{doctorLastName}  != null || $F{doctorPatrName} != null]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="37479cd7-6d6a-4f14-96ab-0645ba7866b7"/>
+					<text><![CDATA[Подпись врача/ак.:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="369c1b28-5539-4786-924f-2dd50be9e788"/>
+					<textFieldExpression><![CDATA[$F{doctorLastName} + ' ' + $F{doctorFirstName} + ' ' + $F{doctorPatrName}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="60" width="555" height="10" isRemoveLineWhenBlank="true" uuid="171453de-d7d5-492d-b2b8-a1a15ede987c">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{craft} != null && $F{craft} != ""]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="918cd26d-2c29-4caa-9298-6470fcdfa569"/>
+					<text><![CDATA[Изменение условий труда:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" uuid="a7c3d427-35ec-4b5c-8e3f-4fbf58ecadba"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="fb8b36aa-4674-46d9-b5f3-28a8a8b793c2">
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{craft}]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarCraft"]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="cb9e960c-b2a5-4ba5-9fd0-de9ee0db917e"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="70" width="555" height="10" isRemoveLineWhenBlank="true" uuid="90c2b959-4024-4264-b46e-fd8382143c40">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{next_date} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="d2743a64-8813-4465-af68-d1f9f17298af"/>
+					<text><![CDATA[Дата след.посещения:]]></text>
+				</staticText>
+				<textField pattern="dd.MM.YYYY" isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="34ff2dbc-2286-4480-b277-77238e806834"/>
+					<textFieldExpression><![CDATA[$F{next_date}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="90" width="555" height="10" isRemoveLineWhenBlank="true" uuid="d521f0f0-9dd9-4974-82d8-e516208cc08a">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{recommendations}  != null &&  $F{recommendations} != ""]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="90cd850b-a9a3-4ce8-9aca-21a8c21feb30"/>
+					<text><![CDATA[Рекомендации:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="6de6e26e-786b-4d69-be55-ebf5a5bda1d2"/>
+					<textElement markup="html"/>
+					<textFieldExpression><![CDATA[$F{recommendations}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<subreport overflowType="Stretch">
+				<reportElement positionType="Float" x="0" y="0" width="555" height="10" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="782858c1-c052-4064-94ed-916274b1d9d7"/>
+				<subreportParameter name="action_id">
+					<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="diagnosisKind_id">
+					<subreportParameterExpression><![CDATA[4]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="label">
+					<subreportParameterExpression><![CDATA["Диагноз"]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["diag_subreport.jrxml"]]></subreportExpression>
+			</subreport>
+			<subreport overflowType="Stretch">
+				<reportElement positionType="Float" x="0" y="10" width="555" height="10" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="cec4a630-446b-4934-af1a-0ca428acbdcb"/>
+				<subreportParameter name="action_id">
+					<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["diag_subreport_associated.jrxml"]]></subreportExpression>
+			</subreport>
+			<subreport overflowType="Stretch">
+				<reportElement positionType="Float" x="0" y="20" width="555" height="10" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true" uuid="74060316-1f45-477c-9d55-1c8979618d0f"/>
+				<subreportParameter name="action_id">
+					<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="diagnosisKind_id">
+					<subreportParameterExpression><![CDATA[5]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="label">
+					<subreportParameterExpression><![CDATA["Диагнозы осложнения"]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["diag_subreport.jrxml"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>
