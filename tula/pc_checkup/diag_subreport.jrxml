@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
+<!-- 2017-03-20T15:18:15 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="diag_subreport" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="e8e5f642-3db4-4e27-adf6-0bb25e003e4a">
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bin\hospital1_risar.xml"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.11:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/first_checkup_files/Main_Jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/first_checkup"/>
+	<style name="left_col" hTextAlign="Left" hImageAlign="Right" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8" isBold="true"/>
+	<style name="right_col" hTextAlign="Left" hImageAlign="Left" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8">
+		<paragraph leftIndent="0"/>
+	</style>
+	<parameter name="action_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[9577]]></defaultValueExpression>
+	</parameter>
+	<parameter name="diagnosisKind_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[4]]></defaultValueExpression>
+	</parameter>
+	<parameter name="label" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT DISTINCT mkb.DiagID AS DiagID, mkb.DiagName AS DiagName
+FROM Diagnostic AS diag
+LEFT JOIN Action as a on diag.action_id = a.id
+LEFT JOIN Diagnosis on diag.diagnosis_id = Diagnosis.id
+LEFT JOIN Action_Diagnosis AS diagKind ON diag.action_id = diagKind.action_id AND diag.diagnosis_id = diagKind.diagnosis_id
+LEFT JOIN MKB mkb ON diag.MKB = mkb.DiagID
+WHERE diag.action_id = $P{action_id} AND diagKind.diagnosisKind_id = $P{diagnosisKind_id} AND (Diagnosis.endDate IS NULL OR Diagnosis.endDate >= a.begDate)]]>
+	</queryString>
+	<field name="DiagID" class="java.lang.String"/>
+	<field name="DiagName" class="java.lang.String"/>
+	<variable name="not_empty" class="java.lang.Boolean">
+		<variableExpression><![CDATA[java.lang.Boolean.getBoolean($F{DiagID})]]></variableExpression>
+	</variable>
+	<variable name="Variable_1" class="java.lang.String"/>
+	<detail>
+		<band height="10" splitType="Stretch">
+			<frame>
+				<reportElement positionType="Float" x="0" y="0" width="555" height="10" isRemoveLineWhenBlank="true" uuid="f6706532-1c35-4401-825f-06e59b3c5ca1">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+				</reportElement>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="right_col" positionType="Float" x="237" y="0" width="318" height="10" uuid="c2da5625-a4dd-4a96-a6ab-f3282f69bc35"/>
+					<textElement>
+						<paragraph leftIndent="0"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{DiagName}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="40" height="10" uuid="0c180cb2-ab21-43e9-b7a2-f9e7b18c7816"/>
+					<textElement verticalAlignment="Top"/>
+					<textFieldExpression><![CDATA[$F{DiagID}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement style="left_col" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="1c7a24ed-e4f1-4d61-9627-c215a75a47e5">
+						<printWhenExpression><![CDATA[$V{REPORT_COUNT} == 1]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Left" markup="none">
+						<font fontName="DejaVu Sans" isBold="true"/>
+						<paragraph leftIndent="0"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{REPORT_COUNT} == 1 ? $P{label} + ":" : ""]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+</jasperReport>
