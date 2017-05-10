@@ -667,7 +667,7 @@ LIMIT 1]]>
 						<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
 					</subreportParameter>
 					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-					<subreportExpression><![CDATA["repo:epicrisis_maindiag.jrxml"]]></subreportExpression>
+					<subreportExpression><![CDATA["epicrisis_maindiag.jrxml"]]></subreportExpression>
 				</subreport>
 			</frame>
 		</band>
@@ -687,7 +687,7 @@ LIMIT 1]]>
 						<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
 					</subreportParameter>
 					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-					<subreportExpression><![CDATA["repo:epicrisis_diagcompl.jrxml"]]></subreportExpression>
+					<subreportExpression><![CDATA["epicrisis_diagcompl.jrxml"]]></subreportExpression>
 				</subreport>
 			</frame>
 		</band>
@@ -712,7 +712,7 @@ LIMIT 1]]>
 					<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["repo:epicrisis_diagother.jrxml"]]></subreportExpression>
+				<subreportExpression><![CDATA["epicrisis_diagother.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 		<band height="175">
@@ -870,7 +870,7 @@ new SimpleDateFormat("HH:mm").format($F{deathTime})]]></textFieldExpression>
 					<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["repo:epicrisis_patdiag.jrxml"]]></subreportExpression>
+				<subreportExpression><![CDATA["epicrisis_patdiag.jrxml"]]></subreportExpression>
 			</subreport>
 			<frame>
 				<reportElement positionType="Float" x="0" y="159" width="555" height="16" uuid="29286b27-8e06-4a79-8f80-36045ed1d42c"/>
@@ -1710,7 +1710,7 @@ new SimpleDateFormat("HH:mm").format($F{deathTime})]]></textFieldExpression>
 					<subreportParameterExpression><![CDATA[$V{MONGODB_CONNECTION}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["repo:epicrisis_children.jrxml"]]></subreportExpression>
+				<subreportExpression><![CDATA["epicrisis_children.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 		<band height="44">

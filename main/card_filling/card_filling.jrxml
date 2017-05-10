@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
-<!-- 2017-02-10T16:25:50 -->
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
+<!-- 2017-05-02T15:54:33 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="card_filling" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="926372c9-174c-4600-b563-b816d6bf06a7">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.zoom" value="1.3310000000000004"/>
@@ -153,7 +153,7 @@ AND ((DATE(e.setDate) < DATE($P{end_date}))
 
 
 AND ($P{organisation_id} IS NULL OR $P{organisation_id} = '' OR FIND_IN_SET(o.id, $P{organisation_id}))
-AND ($P{area} IS NULL OR $P{area} = '' OR FIND_IN_SET(o.area, $P{area}))
+AND ($P{area} IS NULL OR $P{area} = '' OR o.area REGEXP AreaSplit($P{area}))
 AND ($P{risk} IS NULL OR $P{risk} = '' OR $P{risk} = 'Все' OR FIND_IN_SET(riskrate.name, $P{risk}))
 
 GROUP BY o.area, o.id, p.id, riskrate.id]]>
