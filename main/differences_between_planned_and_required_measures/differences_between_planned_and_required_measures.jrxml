@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="differences_between_planned_and_required_measures" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="575" leftMargin="10" rightMargin="10" topMargin="10" bottomMargin="10" uuid="61337543-9980-43f3-826f-1cb9571e545a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.11:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Analytics/differences_between_planned_and_required_measures"/>
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<subDataset name="personFioDataset" uuid="b9b2b36a-6a98-4f0d-b376-85910996cc8a">
+		<parameter name="person_id" class="java.lang.String"/>
+		<queryString>
+			<![CDATA[SELECT IF(MIN(p.id), CONCAT_WS(' ', p.lastName, p.firstName, p.patrName), "Все") AS personInfoDataset
+			FROM Person p
+			WHERE p.id = $P{person_id}]]>
+		</queryString>
+		<field name="personInfoDataset" class="java.lang.String"/>
+	</subDataset>
+	<subDataset name="organisationDataset" uuid="b9b2b36a-6a98-4f0d-b376-85910996cc8a">
+		<parameter name="org_id" class="java.lang.String"/>
+		<queryString>
+			<![CDATA[SELECT IF(MIN(p.id), p.shortName, "Все") AS orgInfoDataset
+			FROM Organisation p
+			WHERE p.id = $P{org_id}]]>
+		</queryString>
+		<field name="orgInfoDataset" class="java.lang.String"/>
+	</subDataset>
+	<subDataset name="kladrInfoDataset" uuid="b9b2b36a-6a98-4f0d-b376-85910996cc8a">
+		<parameter name="area" class="java.lang.String"/>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+	collectionName : 'refbook.KLD172',
+	findQuery : { identcode: { $in: [$P!{area}] }},
+	findFields : {
+		identcode: 1,
+		shorttype: 1,
+		name: 1
+	},
+	rowsToProcess : 5
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+		<field name="shorttype" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="area" class="java.lang.String">
+		<parameterDescription><![CDATA[Территория (-и)]]></parameterDescription>
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="organisation_id" class="java.lang.String">
+		<parameterDescription><![CDATA[Идентификатор ЛПУ]]></parameterDescription>
+	</parameter>
+	<parameter name="person_id" class="java.lang.String">
+		<parameterDescription><![CDATA[Идентификатор врача]]></parameterDescription>
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="risk" class="java.lang.String">
+		<parameterDescription><![CDATA[Степень риска]]></parameterDescription>
+	</parameter>
+	<parameter name="beg_date" class="java.lang.String">
+		<parameterDescription><![CDATA[Дата начала отчетного периода]]></parameterDescription>
+	</parameter>
+	<parameter name="end_date" class="java.lang.String">
+		<parameterDescription><![CDATA[Дата окончания отчетного периода]]></parameterDescription>
+	</parameter>
+	<parameter name="mongo_host" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_port" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_dbname" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_user" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_pw" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[-- Отчет о расхождениях между запланированными и необходимыми по стандартам мероприятиями
+SELECT
+CONCAT_WS(' ', p.lastName, p.firstName, p.patrName) AS personFIO,
+CONCAT_WS(' ', c.lastName, c.firstName, c.patrName) AS clientFIO,
+CONCAT_WS('/', measures.checkupCompleted, measures.checkupTotal) AS checkup,
+CONCAT_WS('/', measures.funcCompleted, measures.funcTotal) AS fuctional,
+CONCAT_WS('/', measures.labCompleted, measures.labTotal) AS laboratory,
+CONCAT_WS('/', measures.hospitalizationCompleted, measures.hospitalizationTotal) AS hospitalization
+-- обращения
+FROM Event e
+-- наблюдающий врач
+INNER JOIN Person p ON p.id = e.execPerson_id
+-- ЛПУ врача
+INNER JOIN Organisation org ON org.id = p.org_id
+-- Пациент
+INNER JOIN Client c ON c.id = e.client_id
+-- Атрибуты Медицинской карты беременной для обращения
+INNER JOIN Action cardAttributes ON cardAttributes.event_id = e.id AND cardAttributes.actionType_id  = (
+	SELECT _aty.id
+	FROM ActionType _aty
+	WHERE _aty.flatCode = 'cardAttributes' AND _aty.deleted = 0
+	LIMIT 1
+)
+-- Степень риска по 572 приказу
+INNER JOIN rbPerinatalRiskRate prenatal_risk ON prenatal_risk.id = (
+	SELECT _apv.value
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON  _apt.id = _ap.type_id
+	INNER JOIN ActionProperty_Integer _apv ON _apv.id = _ap.id
+	WHERE _ap.deleted = 0
+	AND _apt.code = 'prenatal_risk_572'
+	AND _ap.action_id  = cardAttributes.id
+	LIMIT 1
+)
+-- Сведения по мероприятиям
+INNER JOIN (
+	SELECT
+	_em.event_id AS event_id,
+	SUM(_mt.code = 'checkup' AND _st.code IN ('created', 'assigned', 'waiting', 'overdue', 'performed' )) AS checkupTotal,
+	SUM(_mt.code = 'checkup' AND _st.code IN ('performed')) AS checkupCompleted,
+	SUM(_mt.code = 'func_test' AND _st.code IN ('created', 'assigned','waiting', 'overdue', 'performed')) AS funcTotal,
+	SUM(_mt.code = 'func_test' AND _st.code IN ('performed')) AS funcCompleted,
+	SUM(_mt.code = 'lab_test' AND _st.code IN ('created','assigned','waiting',  'overdue', 'performed')) AS labTotal,
+	SUM(_mt.code = 'lab_test' AND _st.code IN ('performed')) AS labCompleted,
+	SUM(_mt.code = 'hospitalization' AND _st.code IN ('created','assigned','waiting', 'overdue', 'performed')) AS hospitalizationTotal,
+	SUM(_mt.code = 'hospitalization' AND _st.code IN ('performed')) AS hospitalizationCompleted
+	FROM EventMeasure _em
+   INNER JOIN ExpertSchemeMeasure _exshm ON _exshm.id = _em.schemeMeasure_id
+   INNER JOIN Measure _m ON _m.id = _exshm.measure_id
+   INNER JOIN rbMeasureType _mt ON _mt.id = _m.measureType_id
+   INNER JOIN rbMeasureStatus _st ON _st.id = _em.status
+   WHERE _em.deleted = 0
+   AND _exshm.deleted = 0
+   AND _m.deleted = 0
+   AND _em.is_actual = 1
+	AND _mt.code IN ('lab_test', 'func_test', 'checkup', 'hospitalization')
+	AND DATE(_em.begDateTime) >= DATE($P{beg_date})
+	AND DATE(_em.begDateTime) <= DATE($P{end_date})
+	GROUP BY _em.event_id
+) measures ON measures.event_id = e.id
+
+
+WHERE e.deleted = 0
+AND p.deleted = 0
+AND c.deleted = 0
+-- Есть незавершенные мероприятия
+AND (
+	measures.checkupCompleted < measures.checkupTotal
+	OR
+	measures.funcCompleted < measures.funcTotal
+	OR
+	measures.labCompleted < measures.labTotal
+	OR
+	measures.hospitalizationCompleted < measures.hospitalizationTotal
+)
+
+-- Не существует не удаленный эпикриз
+AND e.id NOT IN (
+	SELECT _a.event_id
+	FROM Action as _a
+	INNER JOIN ActionType _at
+	ON _at.id = _a.actionType_id AND _at.flatCode = 'epicrisis'
+	WHERE _a.deleted = 0
+)
+-- Случай не закрыт
+AND e.execDate is NULL
+-- Фильтр по степени риска
+AND ($P{risk} IS NULL OR $P{risk} = 'Все' OR $P{risk} = '' OR  prenatal_risk.name = $P{risk})
+-- Фильтр по ЛПУ
+AND ($P{organisation_id} IS NULL OR $P{organisation_id} = 0 OR $P{organisation_id} = org.id)
+-- Фильтр по врачу
+AND ($P{person_id} IS NULL OR $P{person_id} = 0 OR $P{person_id} = p.id)
+-- Фильтр по территории
+AND ($P{area} IS NULL OR $P{area} = '' OR org.area REGEXP AreaSplit($P{area}))
+ORDER BY p.lastName, c.lastName]]>
+	</queryString>
+	<field name="personFIO" class="java.lang.String">
+		<fieldDescription><![CDATA[ФИО врача]]></fieldDescription>
+	</field>
+	<field name="clientFIO" class="java.lang.String">
+		<fieldDescription><![CDATA[ФИО пациента]]></fieldDescription>
+	</field>
+	<field name="checkup" class="java.lang.String">
+		<fieldDescription><![CDATA[Осмотры]]></fieldDescription>
+	</field>
+	<field name="fuctional" class="java.lang.String">
+		<fieldDescription><![CDATA[функциональыне исследования]]></fieldDescription>
+	</field>
+	<field name="laboratory" class="java.lang.String">
+		<fieldDescription><![CDATA[лабораторные исследования]]></fieldDescription>
+	</field>
+	<field name="hospitalization" class="java.lang.String">
+		<fieldDescription><![CDATA[Госпитализации]]></fieldDescription>
+	</field>
+	<variable name="MONGODB_CONNECTION" class="java.sql.Connection">
+		<variableExpression><![CDATA[$V{MONGODB_CONNECTION}]]></variableExpression>
+		<initialValueExpression><![CDATA[new com.jaspersoft.mongodb.connection.MongoDbConnection("mongodb://"+$P{mongo_host}+":"+$P{mongo_port}+"/"+$P{mongo_dbname}, $P{mongo_user}, $P{mongo_pw})]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="100" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="580" height="36" uuid="d7bdb147-cfe3-441a-b8a3-626b73ab8791"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Отчет о расхождениях между запланированными и необходимыми по стандартам мероприятиями]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="36" width="580" height="16" uuid="1524c66d-4ec3-4b9c-bf86-aa07d7bf240b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["За период с " + new SimpleDateFormat("dd.MM.yyyy").format( new SimpleDateFormat("yyyy-MM-dd").parse($P{beg_date})) + " по "+ new SimpleDateFormat("dd.MM.yyyy").format( new SimpleDateFormat("yyyy-MM-dd").parse($P{end_date}))]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="52" width="100" height="16" uuid="2186cc57-ab26-40c0-8b22-6e79f5c9d955"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[Врач:]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement x="100" y="52" width="220" height="16" uuid="733c366f-a7ff-43ac-bd55-48cffd12ccbc">
+					<property name="net.sf.jasperreports.export.headertoolbar.table.name" value=""/>
+				</reportElement>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="personFioDataset" uuid="1d725785-497a-48b3-b881-eb23edc12508">
+						<datasetParameter name="person_id">
+							<datasetParameterExpression><![CDATA[$P{person_id}]]></datasetParameterExpression>
+						</datasetParameter>
+					</datasetRun>
+					<jr:listContents height="16" width="220">
+						<textField>
+							<reportElement x="0" y="0" width="220" height="16" uuid="a84ea25e-7646-4903-9c6a-75dbf259595b"/>
+							<textElement verticalAlignment="Middle">
+								<font fontName="DejaVu Sans" size="10"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{personInfoDataset}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<staticText>
+				<reportElement x="0" y="68" width="100" height="16" uuid="8834c5f4-db12-4c06-a50c-53f6dbad1eef"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[Территория:]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement x="100" y="68" width="220" height="16" uuid="81e3ec29-168a-46f8-82a9-9b3a9828f627">
+					<property name="net.sf.jasperreports.export.headertoolbar.table.name" value=""/>
+				</reportElement>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="kladrInfoDataset" uuid="e23dea44-0c56-4a8e-8bbf-ed41fb538567">
+						<datasetParameter name="area">
+							<datasetParameterExpression><![CDATA["\""+$P{area}.replace(",", "\",\"")+"\""]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="220">
+						<textField>
+							<reportElement x="0" y="0" width="220" height="16" uuid="5938d6c6-e355-4589-b6c2-ed0c0b930358"/>
+							<textElement verticalAlignment="Middle">
+								<font fontName="DejaVu Sans" size="10"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{shorttype} + ". " + $F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<staticText>
+				<reportElement x="320" y="52" width="60" height="48" uuid="ac427c06-5bc1-4b23-95ba-571a342827bb"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[ЛПУ:]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement x="380" y="52" width="200" height="48" uuid="81e3ec29-168a-46f8-82a9-9b3a9828f627">
+					<property name="net.sf.jasperreports.export.headertoolbar.table.name" value=""/>
+				</reportElement>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="organisationDataset" uuid="635a92d6-c3ad-4ecb-81db-0bad71c96cdd">
+						<datasetParameter name="org_id">
+							<datasetParameterExpression><![CDATA[$P{organisation_id}]]></datasetParameterExpression>
+						</datasetParameter>
+					</datasetRun>
+					<jr:listContents height="48" width="200">
+						<textField>
+							<reportElement x="0" y="0" width="200" height="48" uuid="5938d6c6-e355-4589-b6c2-ed0c0b930358">
+								<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+							</reportElement>
+							<textElement textAlignment="Center" verticalAlignment="Middle">
+								<font fontName="DejaVu Sans" size="10"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{orgInfoDataset}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="84" width="320" height="16" uuid="05bf41dd-0d98-4ed4-8bcb-cdc11c864ef7"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[Степень риска:]]></text>
+			</staticText>
+			<textField>
+				<reportElement positionType="Float" x="100" y="84" width="220" height="16" uuid="f3147624-bf3d-4517-9f17-9c82c5d70cf7"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{risk} == null || "".equals($P{risk}) ? "Все" : $P{risk}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="68" width="220" height="16" uuid="e7f56a44-b376-4cae-a47e-80d575972195"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{area} == null || $P{area}.trim().isEmpty() == true
+    ? "Все"
+    : ""
+)]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="30" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="2" width="100" height="28" uuid="b9dc69a4-a1e3-4fa5-b3df-8fa8239e4056"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Наблюдающий врач]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="100" y="2" width="120" height="28" uuid="83e30b7a-c362-49f6-8abe-f4357b08a7c0"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[ФИО пациента]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="220" y="2" width="70" height="28" uuid="4181210c-7396-4d82-b19a-cbb9e0818e6c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Осмотры]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="2" width="100" height="28" uuid="f858e12c-8cce-44e2-b36b-b4f39d61d253"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Лабораторные исследования]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="390" y="2" width="100" height="28" uuid="a042f22c-3ad3-418c-86eb-3ec59ca4acbf"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Функциональные исследования]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="490" y="2" width="90" height="28" uuid="22480d62-8750-42ad-b3ed-937bd93fad31"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Госпитализации]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16" splitType="Prevent">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="100" height="16" uuid="ca6c0399-2a9b-4491-8a6a-1158e6e96358">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{personFIO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="100" y="0" width="120" height="16" uuid="597f8fdc-9314-486b-b269-615f8e65eb45">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{clientFIO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="220" y="0" width="70" height="16" uuid="3cafe58a-55c2-44f6-bd38-900e28685202">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{checkup}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="290" y="0" width="100" height="16" uuid="d93ebe00-da9f-4f0e-a0db-8d713a203c86">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{laboratory}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="390" y="0" width="100" height="16" uuid="cbdafa7c-4a13-4c7e-85da-c2a8d5f15307">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fuctional}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="490" y="0" width="90" height="16" uuid="3ff17b01-390e-4e90-a5f0-5281a39004d6">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hospitalization}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
