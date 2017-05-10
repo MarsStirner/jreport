@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="trimester" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="bbb0bd4c-966a-45d5-83cb-8b92dafcee34">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.11:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Analytics/trimester"/>
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<subDataset name="personFioDataset" uuid="b9b2b36a-6a98-4f0d-b376-85910996cc8a">
+		<parameter name="person_id" class="java.lang.String"/>
+		<queryString>
+			<![CDATA[SELECT IF(MIN(p.id), CONCAT_WS(' ', p.lastName, p.firstName, p.patrName), "Все") AS personInfoDataset
+			FROM Person p
+			WHERE p.id = $P{person_id}]]>
+		</queryString>
+		<field name="personInfoDataset" class="java.lang.String"/>
+	</subDataset>
+	<subDataset name="kladrInfoDataset" uuid="b9b2b36a-6a98-4f0d-b376-85910996cc8a">
+		<parameter name="area" class="java.lang.String"/>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+	collectionName : 'refbook.KLD172',
+	findQuery : { identcode: { $in: [$P!{area}] }},
+	findFields : {
+		identcode: 1,
+		shorttype: 1,
+		name: 1
+	},
+	rowsToProcess : 5
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+		<field name="shorttype" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="area" class="java.lang.String">
+		<parameterDescription><![CDATA[Территория]]></parameterDescription>
+	</parameter>
+	<parameter name="person_id" class="java.lang.String">
+		<parameterDescription><![CDATA[Идентификатор врача]]></parameterDescription>
+	</parameter>
+	<parameter name="report_date" class="java.lang.String">
+		<parameterDescription><![CDATA[Дата на которую формируется отчет]]></parameterDescription>
+	</parameter>
+	<parameter name="mongo_host" class="java.lang.String">
+		<defaultValueExpression><![CDATA["10.1.2.11"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_port" class="java.lang.String">
+		<defaultValueExpression><![CDATA["27017"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_dbname" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["nvesta"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_user" class="java.lang.String"/>
+	<parameter name="mongo_pw" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT
+o.area AS area,
+o.shortName AS lpuInfo,
+CONCAT_WS(' ', p.lastName, p.firstName, p.patrName) AS doctorFIO,
+SUM(DATEDIFF(DATE($P{report_date}), pregnancy_start_date.value) BETWEEN 0 AND 14*7) AS firstTrimester,
+SUM(DATEDIFF(DATE($P{report_date}), pregnancy_start_date.value) BETWEEN 14*7+1 AND 26*7) AS secondTrimester,
+SUM(DATEDIFF(DATE($P{report_date}), pregnancy_start_date.value) > 26*7) AS thirdTrimester
+-- обращения
+FROM Event e
+-- наблюдающий врач
+INNER JOIN Person p ON p.id = e.execPerson_id
+-- ЛПУ врача
+INNER JOIN Organisation o ON o.id = p.org_id
+-- Пациент
+INNER JOIN Client c ON c.id = e.client_id
+-- Атрибуты Медицинской карты беременной для обращения
+INNER JOIN Action cardAttributes ON cardAttributes.id = (
+	SELECT MAX(_a.id)
+	FROM Action _a
+	INNER JOIN ActionType _aty ON _aty.id = _a.actionType_id
+	WHERE _aty.flatCode = 'cardAttributes' AND _aty.deleted = 0
+	AND _a.deleted = 0
+	AND _a.event_id = e.id
+)
+-- Расчётная дата начала беременности [из экшена осмотра]
+INNER JOIN ActionProperty_Date pregnancy_start_date ON pregnancy_start_date.id = (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _ap.type_id = _apt.id
+  WHERE _apt.deleted = 0
+  AND _ap.deleted = 0
+  AND _apt.code ='pregnancy_start_date'
+  AND _ap.action_id = cardAttributes.id
+  LIMIT 1
+)
+WHERE e.deleted = 0
+AND c.deleted = 0
+AND ($P{area} IS NULL OR $P{area} = '' OR o.area REGEXP AreaSplit($P{area}))
+AND ( $P{person_id} IS NULL OR $P{person_id} = '' OR FIND_IN_SET(p.id, $P{person_id}))
+AND DATE(e.setDate) <= DATE($P{report_date})
+-- И не существует эпикриза с датой создания меньше отчетной даты
+AND NOT EXISTS (
+	SELECT _a.id
+	FROM Action _a
+	INNER JOIN ActionType _aty ON _aty.id = _a.actionType_id
+	WHERE _aty.flatCode = 'epicrisis' AND _aty.deleted = 0
+	AND _a.deleted = 0
+	AND _a.event_id = e.id
+	AND DATE(_a.begDate) <= DATE($P{report_date})
+	LIMIT 1
+)
+AND DATE(pregnancy_start_date.value) <= DATE($P{report_date})
+GROUP BY p.id
+ORDER BY o.area, o.id, p.lastName]]>
+	</queryString>
+	<field name="area" class="java.lang.String">
+		<fieldDescription><![CDATA[Кладр-код региона страховой компании]]></fieldDescription>
+	</field>
+	<field name="lpuInfo" class="java.lang.String"/>
+	<field name="doctorFIO" class="java.lang.String"/>
+	<field name="firstTrimester" class="java.math.BigDecimal"/>
+	<field name="secondTrimester" class="java.math.BigDecimal"/>
+	<field name="thirdTrimester" class="java.math.BigDecimal"/>
+	<variable name="MONGODB_CONNECTION" class="java.sql.Connection">
+		<variableExpression><![CDATA[$V{MONGODB_CONNECTION}]]></variableExpression>
+		<initialValueExpression><![CDATA[new com.jaspersoft.mongodb.connection.MongoDbConnection("mongodb://"+$P{mongo_host}+":"+$P{mongo_port}+"/"+$P{mongo_dbname}, $P{mongo_user}, $P{mongo_pw})]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="68" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="554" height="20" uuid="cda06f48-7843-40a6-8c79-4fdbdfc93b8d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Отчет по количеству пациенток по триместрам]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="20" width="80" height="16" uuid="19d636ed-f518-403b-a3c3-4762136be3aa"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[На дату:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="36" width="80" height="16" uuid="51550cbb-39a6-4b98-b96a-b71825aa2219"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[Врач:]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement x="80" y="36" width="240" height="16" uuid="caab6bb7-4ac3-42cd-af66-36064a6f8bc2">
+					<property name="net.sf.jasperreports.export.headertoolbar.table.name" value=""/>
+				</reportElement>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="personFioDataset" uuid="f6589f1e-3085-41f9-8c8a-f48c62ce5ee2">
+						<datasetParameter name="person_id">
+							<datasetParameterExpression><![CDATA[$P{person_id}]]></datasetParameterExpression>
+						</datasetParameter>
+					</datasetRun>
+					<jr:listContents height="16" width="240">
+						<textField>
+							<reportElement x="0" y="0" width="240" height="16" uuid="2547ab16-3867-4dfb-add2-5c83ed6aaf55"/>
+							<textElement verticalAlignment="Middle">
+								<font fontName="DejaVu Sans" size="10"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{personInfoDataset}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<staticText>
+				<reportElement x="0" y="52" width="80" height="16" uuid="4bf1d2ca-044b-44f6-9aca-512ec4c1411a"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[Территория:]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement x="80" y="52" width="240" height="16" uuid="89c9ebcb-daf1-46af-85f3-e42cbfbf5f15">
+					<property name="net.sf.jasperreports.export.headertoolbar.table.name" value=""/>
+				</reportElement>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="kladrInfoDataset" uuid="1586f517-90a6-441c-beb2-5f708a704197">
+						<datasetParameter name="area">
+							<datasetParameterExpression><![CDATA["\""+$P{area}.replace(",", "\",\"")+"\""]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="240">
+						<textField>
+							<reportElement x="0" y="0" width="240" height="16" uuid="cfde9c9c-ea28-44f3-8f1f-c2cd43c95404"/>
+							<textElement verticalAlignment="Middle">
+								<font fontName="DejaVu Sans" size="10"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{shorttype} + ". " + $F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<textField>
+				<reportElement x="80" y="20" width="240" height="16" uuid="9cc6d908-6e60-4f0f-92b8-87f5400fb14f"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd.MM.yyyy").format(new SimpleDateFormat("yyyy-MM-dd").parse($P{report_date}))]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="52" width="240" height="16" uuid="a5946feb-7c14-43bb-8b10-17e8f87e29a8"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{area} == null || $P{area}.trim().isEmpty() == true
+    ? "Все"
+    : ""
+)]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="28" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="100" height="28" uuid="a4959aeb-2287-4648-bb7c-a65f5000e669">
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[Территория]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="100" y="0" width="150" height="28" uuid="74c025ac-3725-4505-8eae-c83faf12b314">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[ЛПУ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="250" y="0" width="150" height="28" uuid="8059a8e5-ac23-4b27-b3c5-4a00bde6fec6">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[Врач]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="450" y="14" width="50" height="14" uuid="add752d4-1480-4348-9f82-ee8b8f741b9d">
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[II]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="14" width="50" height="14" uuid="360b1031-bb99-464f-8a57-6c9df71e7a31">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[I]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="14" width="50" height="14" uuid="2e815a27-a196-4c1b-9aca-aaaeb7eec0b3">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="2.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="10"/>
+				</textElement>
+				<text><![CDATA[III]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="0" width="150" height="14" uuid="910fd857-feff-4b0f-9ace-981e34cea418">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<text><![CDATA[Количество по триместрам]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16" splitType="Stretch">
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="100" height="16" uuid="124ac8d2-2f75-45f5-bfcc-abc397525d4c">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineStyle="Solid"/>
+				</graphicElement>
+			</rectangle>
+			<componentElement>
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="100" height="16" isPrintWhenDetailOverflows="true" uuid="b8038067-c445-48aa-a903-86138c724c8d">
+					<property name="net.sf.jasperreports.export.headertoolbar.table.name" value=""/>
+				</reportElement>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="kladrInfoDataset" uuid="a999b63e-9974-482a-be81-c71dd13689cf">
+						<datasetParameter name="area">
+							<datasetParameterExpression><![CDATA["\""+$F{area}+"\""
+]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="16" width="240">
+						<textField>
+							<reportElement x="0" y="0" width="100" height="16" uuid="2e406926-456e-4cae-be62-4d71c365fb09"/>
+							<textElement verticalAlignment="Middle">
+								<font fontName="DejaVu Sans" size="10"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{shorttype} + ". " + $F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="100" y="0" width="150" height="16" isPrintWhenDetailOverflows="true" uuid="2755926d-1de2-4991-a175-11c4742766dd"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{lpuInfo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="250" y="0" width="150" height="16" isPrintWhenDetailOverflows="true" uuid="623715d7-ce6c-4764-84d2-be0e5b43b874"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{doctorFIO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="400" y="0" width="50" height="16" isPrintWhenDetailOverflows="true" uuid="51cc7400-071d-4fb6-801f-661d80dd98e2">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{firstTrimester}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="450" y="0" width="50" height="16" isPrintWhenDetailOverflows="true" uuid="20c5c097-405f-4412-b3d9-ab0c0d9012c2">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{secondTrimester}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="500" y="0" width="50" height="16" isPrintWhenDetailOverflows="true" uuid="e8d36e5f-55ea-4e26-adee-9c76a7bd9f7f">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{thirdTrimester}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
