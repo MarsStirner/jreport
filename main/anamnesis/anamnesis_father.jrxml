@@ -1,0 +1,1146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
+<!-- 2017-05-10T11:15:39 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="anamnesis_father" language="groovy" pageWidth="372" pageHeight="802" columnWidth="372" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="566485a6-56bc-4bcb-bfe3-350706192bcb">
+	<property name="ireport.zoom" value="0.9090909090909095"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.11:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/anamnesis_files/anamnesis_father.jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/anamnesis"/>
+	<style name="left_col_common" hTextAlign="Left" hImageAlign="Right" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8" isBold="false"/>
+	<style name="right_col" hTextAlign="Left" hImageAlign="Left" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8">
+		<paragraph leftIndent="0"/>
+	</style>
+	<style name="left_col" hTextAlign="Left" hImageAlign="Right" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8" isBold="false"/>
+	<subDataset name="mongo" uuid="7c239937-8cdb-4242-8914-bf9b7b7f5398">
+		<parameter name="code" class="java.lang.String" isForPrompting="false"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+	collectionName : $P{refbook},
+	findQuery : { code: $P{code} },
+	findFields : {
+		name: 1
+	},
+	rowsToProcess : 5,
+	limit : 1
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+		<field name="shorttype" class="java.lang.String"/>
+	</subDataset>
+	<subDataset name="multipleCodes" uuid="38c95a91-9993-473b-8d48-16c760e58ef4">
+		<parameter name="codes" class="java.lang.String[]"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<parameter name="title" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+	collectionName : $P{refbook},
+	findQuery : { code: { $in: [$P!{codes}] }},
+	findFields : {
+		name: 1
+	},
+	rowsToProcess : 5
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="event_id" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["670"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="MONGODB_CONNECTION" class="java.sql.Connection"/>
+	<queryString>
+		<![CDATA[select
+
+  f_blood_type.name as f_blood_type,
+  f_education.value as f_education,
+  f_infertility_type.value as f_infertility_type,
+  GROUP_CONCAT(DISTINCT f_infertility_treatment.value) as f_infertility_treatment,
+  GROUP_CONCAT(DISTINCT f_infertility_cause.value) as f_infertility_cause,
+  GROUP_CONCAT(DISTINCT f_hereditary.value) as f_hereditary,
+  f_professional_properties.value as f_professional_properties,
+  f_work_group.value as f_work_group,
+  f_infertility.value as f_infertility,
+  f_HIV.value as f_HIV,
+  f_toxic.value as f_toxic,
+  f_drugs.value as f_drugs,
+  f_alcohol.value as f_alcohol,
+  f_smoking.value as f_smoking,
+  f_age.value as f_age,
+  f_infertility_period.value as f_infertility_period,
+  f_name.value as f_name,
+  f_phone.value as f_phone,
+  f_fluorography.value as f_fluorography,
+  f_finished_diseases_text.value as f_finished_diseases_text,
+  f_current_diseases_text.value as f_current_diseases_text,
+  f_finished_diseases.diag_list as f_finished_diseases,
+  f_current_diseases.diag_list as f_current_diseases
+
+FROM Event evt
+LEFT JOIN Client clnt ON evt.client_id = clnt.id AND clnt.deleted = 0
+
+LEFT JOIN `Action` an_father ON (
+        an_father.event_id = evt.id AND
+        an_father.actionType_id IN (SELECT id FROM ActionType WHERE ActionType.flatCode = 'risar_father_anamnesis') AND
+        an_father.deleted = 0
+)
+
+LEFT JOIN (
+	SELECT
+	GROUP_CONCAT(MKB.DiagID separator ", ") as diag_list,
+	_ap.action_id as action_id
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'finished_diseases'
+	INNER JOIN ActionProperty_MKB _ap_v ON _ap_v.id = _ap.id
+	INNER JOIN MKB ON _ap_v.value = MKB.id
+	WHERE _ap.deleted = 0
+	GROUP BY _ap.action_id
+) as f_finished_diseases ON f_finished_diseases.action_id = an_father.id
+
+LEFT JOIN (
+	SELECT
+	GROUP_CONCAT(MKB.DiagID separator ", ") as diag_list,
+	_ap.action_id as action_id
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'current_diseases'
+	INNER JOIN ActionProperty_MKB _ap_v ON _ap_v.id = _ap.id
+	INNER JOIN MKB ON _ap_v.value = MKB.id
+	WHERE _ap.deleted = 0
+	GROUP BY _ap.action_id
+) as f_current_diseases ON f_current_diseases.action_id = an_father.id
+
+
+LEFT JOIN rbBloodType f_blood_type ON f_blood_type.id = (
+	SELECT _api.value
+	FROM ActionProperty_Integer _api
+	INNER JOIN ActionProperty _ap ON _api.id = _ap.id
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'blood_type'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+
+LEFT JOIN ActionProperty_String f_name ON f_name.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'name'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+LEFT JOIN ActionProperty_String f_phone ON f_phone.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'phone'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+LEFT JOIN ActionProperty_String f_fluorography ON f_fluorography.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'fluorography'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+LEFT JOIN ActionProperty_String f_finished_diseases_text ON f_finished_diseases_text.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'finished_diseases_text'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+LEFT JOIN ActionProperty_String f_current_diseases_text ON f_current_diseases_text.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'current_diseases_text'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+
+LEFT JOIN ActionProperty_ExtRef f_education ON f_education.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'education'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = an_father.id
+  LIMIT 1
+)
+LEFT JOIN ActionProperty_ExtRef f_infertility_type ON f_infertility_type.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'infertility_type'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = an_father.id
+  LIMIT 1
+)
+LEFT JOIN ActionProperty_ExtRef f_infertility_treatment ON f_infertility_treatment.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'infertility_treatment'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = an_father.id
+  LIMIT 1
+)
+LEFT JOIN ActionProperty_ExtRef f_infertility_cause ON f_infertility_cause.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'infertility_cause'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = an_father.id
+  LIMIT 1
+)
+LEFT JOIN ActionProperty_ExtRef f_hereditary ON f_hereditary.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'hereditary'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = an_father.id
+  LIMIT 1
+)
+
+LEFT JOIN ActionProperty_ExtRef f_professional_properties ON f_professional_properties.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'professional_properties'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = an_father.id
+  LIMIT 1
+)
+LEFT JOIN ActionProperty_ExtRef f_work_group ON f_work_group.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'work_group'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = an_father.id
+  LIMIT 1
+)
+LEFT JOIN ActionProperty_Integer f_HIV ON f_HIV.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'HIV'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+LEFT JOIN ActionProperty_Integer f_age ON f_age.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'age'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+LEFT JOIN ActionProperty_Integer f_infertility ON f_infertility.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'infertility'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+LEFT JOIN ActionProperty_Integer f_infertility_period ON f_infertility_period.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'infertility_period'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+LEFT JOIN ActionProperty_Integer f_alcohol ON f_alcohol.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'alcohol'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+
+LEFT JOIN ActionProperty_Integer f_smoking ON f_smoking.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'smoking'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+
+LEFT JOIN ActionProperty_Integer f_toxic ON f_toxic.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'toxic'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+
+LEFT JOIN ActionProperty_Integer f_drugs ON f_drugs.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'drugs'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = an_father.id
+	LIMIT 1
+)
+
+WHERE evt.id = $P{event_id}
+AND evt.deleted = 0]]>
+	</queryString>
+	<field name="f_blood_type" class="java.lang.String"/>
+	<field name="f_education" class="java.lang.String"/>
+	<field name="f_infertility_type" class="java.lang.String"/>
+	<field name="f_infertility_treatment" class="java.lang.String"/>
+	<field name="f_infertility_cause" class="java.lang.String"/>
+	<field name="f_hereditary" class="java.lang.String"/>
+	<field name="f_professional_properties" class="java.lang.String"/>
+	<field name="f_work_group" class="java.lang.String"/>
+	<field name="f_infertility" class="java.lang.Integer"/>
+	<field name="f_HIV" class="java.lang.Integer"/>
+	<field name="f_toxic" class="java.lang.Integer"/>
+	<field name="f_drugs" class="java.lang.Integer"/>
+	<field name="f_alcohol" class="java.lang.Integer"/>
+	<field name="f_smoking" class="java.lang.Integer"/>
+	<field name="f_age" class="java.lang.Integer"/>
+	<field name="f_infertility_period" class="java.lang.Integer"/>
+	<field name="f_name" class="java.lang.String"/>
+	<field name="f_phone" class="java.lang.String"/>
+	<field name="f_fluorography" class="java.lang.String"/>
+	<field name="f_finished_diseases_text" class="java.lang.String"/>
+	<field name="f_current_diseases_text" class="java.lang.String"/>
+	<field name="f_finished_diseases" class="java.lang.String"/>
+	<field name="f_current_diseases" class="java.lang.String"/>
+	<variable name="MONGODB_CONNECTION" class="java.sql.Connection">
+		<variableExpression><![CDATA[$V{MONGODB_CONNECTION}]]></variableExpression>
+		<initialValueExpression><![CDATA[$P{MONGODB_CONNECTION}]]></initialValueExpression>
+	</variable>
+	<summary>
+		<band height="220" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="372" height="10" isRemoveLineWhenBlank="true" uuid="d28c9acf-f968-41d1-a457-26f12bbabe24">
+					<printWhenExpression><![CDATA[($F{f_name} != null && $F{f_name} != '')]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" stretchType="RelativeToTallestObject" x="0" y="0" width="180" height="10" uuid="9b76f0c0-ce0f-4483-a0ba-1b0cd21b0d8d"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[ФИО]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="right_col" x="180" y="0" width="192" height="10" uuid="8de14c94-b506-4fd3-9122-18903dc1fd92"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{f_name}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="10" width="372" height="10" isRemoveLineWhenBlank="true" uuid="d88e236b-e7ae-4a08-a452-95eeeb329240">
+					<printWhenExpression><![CDATA[($F{f_age} != null && $F{f_age} != '')]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="180" height="10" uuid="a71f5f3b-f787-4d08-a20f-b5f32ef2db27"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Возраст]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="180" y="0" width="192" height="10" uuid="8dec8462-1fdf-4198-8d81-6bd6f335a2f2"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{f_age}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="20" width="372" height="10" isRemoveLineWhenBlank="true" uuid="4076bbd2-8f0d-44a2-842d-affb68d3d612">
+					<printWhenExpression><![CDATA[($F{f_education} != null && $F{f_education} != '')]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement style="left_col_common" x="0" y="0" width="180" height="10" uuid="c17f691a-8271-4797-a860-c282ad85ce22"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Образование]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" x="180" y="0" width="192" height="10" uuid="7438c090-f789-4667-896b-5a62050158c3"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="e37d2034-f763-4165-8540-e43bd3019120">
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook."+"rbRisarEducation"]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{f_education}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="192">
+							<textField isBlankWhenNull="true">
+								<reportElement style="right_col" x="0" y="0" width="192" height="10" uuid="e4fb940c-fa8b-4e68-a1a0-ca2d29416c52"/>
+								<box leftPadding="5">
+									<topPen lineWidth="0.25"/>
+									<leftPen lineWidth="0.25"/>
+									<bottomPen lineWidth="0.25"/>
+									<rightPen lineWidth="0.25"/>
+								</box>
+								<textElement verticalAlignment="Top">
+									<font fontName="DejaVu Sans" isPdfEmbedded="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="30" width="372" height="10" isRemoveLineWhenBlank="true" uuid="63e142ee-72ae-420f-a618-c868f15aac7a">
+					<printWhenExpression><![CDATA[($F{f_work_group} != null && $F{f_work_group} != '')]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement style="left_col_common" x="0" y="0" width="180" height="10" uuid="8bae79d8-4cd6-4f20-9d1c-22d46cd91cd6"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Общественно-профессиональная группа]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" x="180" y="0" width="192" height="10" uuid="791e286b-bb69-4858-a106-dcff731ed58a"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="d93ee40e-9329-4ff5-ab51-c2a7951957f9">
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook."+"rbRisarWork_Group"]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{f_work_group}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="192">
+							<textField isBlankWhenNull="true">
+								<reportElement style="right_col" x="0" y="0" width="192" height="10" uuid="87d9e784-4925-4952-8e1e-7c3c84e13307"/>
+								<box leftPadding="5">
+									<topPen lineWidth="0.25"/>
+									<leftPen lineWidth="0.25"/>
+									<bottomPen lineWidth="0.25"/>
+									<rightPen lineWidth="0.25"/>
+								</box>
+								<textElement verticalAlignment="Top">
+									<font fontName="DejaVu Sans" isPdfEmbedded="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="40" width="372" height="10" isRemoveLineWhenBlank="true" uuid="ad930ac1-73cd-4294-a886-19f72af4a2c1">
+					<printWhenExpression><![CDATA[($F{f_professional_properties} != null && $F{f_professional_properties} != '')]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement style="left_col_common" x="0" y="0" width="180" height="10" uuid="7eb65cb0-61fa-4cff-bc86-e5241d03d73b"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Профессиональные вредности]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" positionType="Float" x="180" y="0" width="192" height="10" uuid="ea06a1cd-ead3-49cb-9f16-0b0daa011d31"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="ed40fe44-c542-49b7-af02-1cba7f99228a">
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook."+"rbRisarProfessional_Properties"]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{f_professional_properties}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="192">
+							<textField isBlankWhenNull="true">
+								<reportElement style="right_col" x="0" y="0" width="192" height="10" uuid="d9b17fa5-382e-49d3-9d9d-28b4d1aa57a4"/>
+								<box leftPadding="5">
+									<topPen lineWidth="0.25"/>
+									<leftPen lineWidth="0.25"/>
+									<bottomPen lineWidth="0.25"/>
+									<rightPen lineWidth="0.25"/>
+								</box>
+								<textElement verticalAlignment="Top">
+									<font fontName="DejaVu Sans" isPdfEmbedded="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="50" width="372" height="10" isRemoveLineWhenBlank="true" uuid="68e4698f-73b5-4e3c-a86f-691cd69730d5">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[($F{f_blood_type} != null && $F{f_blood_type} != '')]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="180" height="10" uuid="1f562827-5caf-4db7-a685-c442a84fda52"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Группа крови и резус-фактор]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" x="180" y="0" width="192" height="10" uuid="27b91729-60c2-4a6c-a60a-24659ebcf0b1"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{f_blood_type}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="60" width="372" height="10" isRemoveLineWhenBlank="true" uuid="561b893d-e268-4cb5-b842-90b5722b7a60">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[($F{f_phone} != null && $F{f_phone} != '')]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="180" height="10" uuid="814e2876-99da-4cd5-b7ed-f435fe7ec796"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Телефон]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="180" y="0" width="192" height="10" uuid="d652d906-75f0-43d2-b7cf-e406b937f120"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{f_phone}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<staticText>
+				<reportElement style="left_col_common" positionType="Float" x="0" y="70" width="180" height="10" uuid="a52f47b4-cfc7-4243-897e-63744ff2d167"/>
+				<box topPadding="0" leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="false"/>
+				</textElement>
+				<text><![CDATA[ВИЧ]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement style="right_col" positionType="Float" x="180" y="70" width="192" height="10" uuid="1a79a79d-65e4-4e07-9e1a-2c81669d93d0"/>
+				<box topPadding="0" leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement>
+					<font fontName="DejaVu Sans"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{f_HIV} == 1 ? "есть" : "нет")]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement positionType="Float" x="0" y="80" width="372" height="10" isRemoveLineWhenBlank="true" uuid="6639e11f-68b1-46b4-a797-8e02c86c8d7d">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[($F{f_fluorography} != null && $F{f_fluorography} != '')]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="180" height="10" uuid="97145e28-d773-4a4b-b572-6ee4ea2f27a0"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Флюорография]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="180" y="0" width="192" height="10" uuid="f9581674-bf6f-4d51-9d7b-20d9939b6b7f"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{f_fluorography}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<staticText>
+				<reportElement style="left_col" positionType="Float" x="0" y="90" width="372" height="10" isRemoveLineWhenBlank="true" uuid="3fb6d410-b387-45c4-8d2b-beb3b5287dda">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[($F{f_infertility} == 1)]]></printWhenExpression>
+				</reportElement>
+				<box topPadding="0" leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Бесплодие]]></text>
+			</staticText>
+			<frame>
+				<reportElement positionType="Float" x="0" y="100" width="372" height="40" isRemoveLineWhenBlank="true" uuid="93b4e4be-d919-45a9-958d-9661f841391a">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[($F{f_infertility} == 1)]]></printWhenExpression>
+				</reportElement>
+				<frame>
+					<reportElement positionType="Float" x="0" y="0" width="372" height="10" uuid="d1fd0eb5-8aa3-450c-8510-1d033bce9c9d"/>
+					<staticText>
+						<reportElement style="left_col" x="0" y="0" width="180" height="10" uuid="2b1c1f5a-6818-4412-8fb3-82ca8d2f3a7d"/>
+						<box topPadding="0" leftPadding="25">
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<textElement>
+							<font fontName="DejaVu Sans" isBold="false"/>
+						</textElement>
+						<text><![CDATA[Вид]]></text>
+					</staticText>
+					<componentElement>
+						<reportElement style="right_col" x="180" y="0" width="192" height="10" uuid="acf3cd37-f4f4-463a-9c69-1d1b5f900a75"/>
+						<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+							<datasetRun subDataset="mongo" uuid="b8ab4c84-63db-48b6-88e6-dc749619d77f">
+								<datasetParameter name="refbook">
+									<datasetParameterExpression><![CDATA["refbook."+"rbRisarInfertility_Type"]]></datasetParameterExpression>
+								</datasetParameter>
+								<datasetParameter name="code">
+									<datasetParameterExpression><![CDATA[$F{f_infertility_type}]]></datasetParameterExpression>
+								</datasetParameter>
+								<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+							</datasetRun>
+							<jr:listContents height="10" width="192">
+								<textField isBlankWhenNull="true">
+									<reportElement style="right_col" x="0" y="0" width="192" height="10" uuid="34b54989-2598-48b4-878c-da89215b6358"/>
+									<box leftPadding="5">
+										<topPen lineWidth="0.25"/>
+										<leftPen lineWidth="0.25"/>
+										<bottomPen lineWidth="0.25"/>
+										<rightPen lineWidth="0.25"/>
+									</box>
+									<textElement verticalAlignment="Top">
+										<font fontName="DejaVu Sans" isPdfEmbedded="true"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+								</textField>
+							</jr:listContents>
+						</jr:list>
+					</componentElement>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="10" width="372" height="10" uuid="351578d4-69e8-4c95-b712-2ca7d6580a94">
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					</reportElement>
+					<staticText>
+						<reportElement style="left_col" x="0" y="0" width="180" height="10" uuid="4e1ac0f7-51fa-4b92-bad5-8766a0d62a41"/>
+						<box topPadding="0" leftPadding="25">
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<textElement>
+							<font fontName="DejaVu Sans" isBold="false"/>
+						</textElement>
+						<text><![CDATA[Длительность, лет]]></text>
+					</staticText>
+					<textField isBlankWhenNull="true">
+						<reportElement style="right_col" x="180" y="0" width="192" height="10" uuid="2a84edaf-431d-478a-b810-b66702fbc2d7"/>
+						<box topPadding="0" leftPadding="5">
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<textElement>
+							<font fontName="DejaVu Sans"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{f_infertility_period}]]></textFieldExpression>
+					</textField>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="20" width="372" height="10" uuid="78157a0b-a209-4637-a567-f3ffc2721059">
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<staticText>
+						<reportElement style="left_col" stretchType="RelativeToTallestObject" x="0" y="0" width="180" height="10" uuid="d3f133d1-4e6c-4f5b-a12b-85356225fbda"/>
+						<box topPadding="0" leftPadding="25">
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<textElement>
+							<font fontName="DejaVu Sans" isBold="false"/>
+						</textElement>
+						<text><![CDATA[Лечение]]></text>
+					</staticText>
+					<componentElement>
+						<reportElement style="right_col" x="180" y="0" width="192" height="10" uuid="a1bc68b1-7d93-43bc-b111-26fd43f99ad1"/>
+						<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Horizontal">
+							<datasetRun subDataset="multipleCodes" uuid="26ac8488-bfa8-4118-9179-95dd87de4a75">
+								<datasetParameter name="refbook">
+									<datasetParameterExpression><![CDATA["refbook."+"rbRisarFatherInfertility_Treatment"]]></datasetParameterExpression>
+								</datasetParameter>
+								<datasetParameter name="codes">
+									<datasetParameterExpression><![CDATA["\""+$F{f_infertility_treatment}.replace(",", "\",\"")+"\""]]></datasetParameterExpression>
+								</datasetParameter>
+								<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+							</datasetRun>
+							<jr:listContents height="10" width="192">
+								<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+									<reportElement style="right_col" x="0" y="0" width="192" height="10" uuid="baf80d02-7bd8-4d17-9a85-11761d0e3aea"/>
+									<box leftPadding="5">
+										<topPen lineWidth="0.25"/>
+										<leftPen lineWidth="0.25"/>
+										<bottomPen lineWidth="0.25"/>
+										<rightPen lineWidth="0.25"/>
+									</box>
+									<textElement verticalAlignment="Top">
+										<font fontName="DejaVu Sans" isPdfEmbedded="true"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+								</textField>
+							</jr:listContents>
+						</jr:list>
+					</componentElement>
+				</frame>
+				<frame>
+					<reportElement positionType="Float" x="0" y="30" width="372" height="10" uuid="758e2be6-b1a4-4a90-8876-a907a50d45ab">
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					</reportElement>
+					<staticText>
+						<reportElement style="left_col" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="180" height="10" uuid="fc57adcd-799d-4407-83b0-382eed9d0c72"/>
+						<box topPadding="0" leftPadding="25">
+							<topPen lineWidth="0.25"/>
+							<leftPen lineWidth="0.25"/>
+							<bottomPen lineWidth="0.25"/>
+							<rightPen lineWidth="0.25"/>
+						</box>
+						<textElement>
+							<font fontName="DejaVu Sans" isBold="false"/>
+						</textElement>
+						<text><![CDATA[Причины]]></text>
+					</staticText>
+					<componentElement>
+						<reportElement style="right_col" positionType="Float" x="180" y="0" width="192" height="10" uuid="f6b81487-409b-4402-b8ff-960d6fdf0b5c"/>
+						<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Horizontal">
+							<datasetRun subDataset="multipleCodes" uuid="8d1cf1e1-f5cb-45f0-8dc2-d2187f4b79ab">
+								<datasetParameter name="refbook">
+									<datasetParameterExpression><![CDATA["refbook."+"rbRisarFatherInfertilityCauses"]]></datasetParameterExpression>
+								</datasetParameter>
+								<datasetParameter name="codes">
+									<datasetParameterExpression><![CDATA["\""+$F{f_infertility_cause}.replace(",", "\",\"")+"\""]]></datasetParameterExpression>
+								</datasetParameter>
+								<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+							</datasetRun>
+							<jr:listContents height="10" width="192">
+								<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+									<reportElement style="right_col" x="0" y="0" width="192" height="10" uuid="0b0520ee-9129-4843-8d52-91f2a1f2addc"/>
+									<box leftPadding="5">
+										<topPen lineWidth="0.25"/>
+										<leftPen lineWidth="0.25"/>
+										<bottomPen lineWidth="0.25"/>
+										<rightPen lineWidth="0.25"/>
+									</box>
+									<textElement verticalAlignment="Top">
+										<font fontName="DejaVu Sans" isPdfEmbedded="true"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+								</textField>
+							</jr:listContents>
+						</jr:list>
+					</componentElement>
+				</frame>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="140" width="372" height="10" isRemoveLineWhenBlank="true" uuid="c1bf1059-22f9-478f-be43-5d8a1ea6fc45">
+					<printWhenExpression><![CDATA[(($F{f_finished_diseases} != '' &&  $F{f_finished_diseases} != null) ||
+($F{f_finished_diseases_text} != '' &&  $F{f_finished_diseases_text} != null))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement style="left_col" stretchType="RelativeToTallestObject" x="0" y="0" width="180" height="10" uuid="5ffb653f-16aa-4ef3-8767-14c439b0b97c"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Перенесенные заболевания]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="right_col" x="180" y="0" width="192" height="10" uuid="a0f816f0-35a0-458a-a25f-36183ea84d76"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement markup="html">
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{f_finished_diseases} != '' &&  $F{f_finished_diseases} != null ? $F{f_finished_diseases} : '')
++ " "
++ ($F{f_finished_diseases_text} != '' &&  $F{f_finished_diseases_text} != null ? $F{f_finished_diseases_text} : '')]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="150" width="372" height="10" isRemoveLineWhenBlank="true" uuid="9dc11a3f-6514-42d3-a98f-dc11c3116d9c">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[($F{f_hereditary} != null && $F{f_hereditary} != '')]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement style="left_col" stretchType="RelativeToBandHeight" x="0" y="0" width="180" height="10" uuid="fa8e4c75-5ed3-4abd-ab56-68bfb9ab6232"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Наследственность]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" x="180" y="0" width="192" height="10" uuid="4d704489-d9da-49b9-9c31-93215d358076"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Horizontal">
+						<datasetRun subDataset="multipleCodes" uuid="8b281e40-e255-4d71-a705-191d5b1ba0da">
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook."+"rbRisarHereditary"]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="codes">
+								<datasetParameterExpression><![CDATA["\""+$F{f_hereditary}.replace(",", "\",\"")+"\""]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="192">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement style="right_col" x="0" y="0" width="192" height="10" uuid="fa2c8e20-9c72-4257-9771-c3d011876aa6"/>
+								<box leftPadding="5">
+									<topPen lineWidth="0.25"/>
+									<leftPen lineWidth="0.25"/>
+									<bottomPen lineWidth="0.25"/>
+									<rightPen lineWidth="0.25"/>
+								</box>
+								<textElement verticalAlignment="Top">
+									<font fontName="DejaVu Sans" isPdfEmbedded="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="160" width="372" height="10" isRemoveLineWhenBlank="true" uuid="5707848b-370f-4768-9d0c-8fa7f3710540">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[(($F{f_current_diseases} != '' &&  $F{f_current_diseases} != null) ||
+($F{f_current_diseases_text} != '' &&  $F{f_current_diseases_text} != null))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<staticText>
+					<reportElement style="left_col" stretchType="RelativeToTallestObject" x="0" y="0" width="180" height="10" uuid="8a9d3c03-f69c-4a6d-9137-9dfb389551c6"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Текущие заболевания]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="right_col" x="180" y="0" width="192" height="10" uuid="8d793b60-9e5d-4e2a-9417-1be3391385f9"/>
+					<box topPadding="0" leftPadding="5" bottomPadding="0" rightPadding="0">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement markup="html">
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{f_current_diseases} != '' &&  $F{f_current_diseases} != null ? $F{f_current_diseases} : '')
++ " "
++ ($F{f_current_diseases_text} != '' &&  $F{f_current_diseases_text} != null ? $F{f_current_diseases_text} : '')]]></textFieldExpression>
+				</textField>
+			</frame>
+			<staticText>
+				<reportElement style="left_col" positionType="Float" x="0" y="170" width="372" height="10" uuid="0600c45d-7ff2-49a8-b68d-fd57dd6c0968">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<box topPadding="0" leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Вредные привычки]]></text>
+			</staticText>
+			<frame>
+				<reportElement positionType="Float" x="0" y="180" width="372" height="10" isRemoveLineWhenBlank="true" uuid="971db80f-2f00-4e1b-a2c4-488fb525566c">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="180" height="10" uuid="b56afa28-8324-4e1e-a57f-949fd9d28491"/>
+					<box topPadding="0" leftPadding="25">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Алкоголь]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="180" y="0" width="192" height="10" uuid="74c28dd0-0419-4a48-9b8f-6c48a02e72d5"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{f_alcohol} == 1 ? "да" : "нет")]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="190" width="372" height="10" isRemoveLineWhenBlank="true" uuid="6727bb53-149d-47b1-b24a-b61fada62b0c">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="180" height="10" uuid="ade6c578-27cd-4a94-ac03-452dcc4fa88d"/>
+					<box topPadding="0" leftPadding="25">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Курение]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="180" y="0" width="192" height="10" uuid="42f9cca0-39e4-4edf-a2fd-735f4979bcb2"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{f_smoking} == 1 ? "да" : "нет")]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="200" width="372" height="10" isRemoveLineWhenBlank="true" uuid="c7aa35ba-f6df-4ce3-a4a8-c809cea96372">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="180" height="10" uuid="986e9bcd-a26f-43ac-80eb-9aba9f3cbf40"/>
+					<box topPadding="0" leftPadding="25">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Токсические вещества]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="180" y="0" width="192" height="10" uuid="cf7ca80b-7ee1-45f3-b53c-19f2b5835240"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{f_toxic} == 1 ? "да" : "нет")]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="210" width="372" height="10" isRemoveLineWhenBlank="true" uuid="4d1fb861-ea6f-44c3-b0da-727d3e648f4d">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="180" height="10" uuid="0afff35c-5631-49cc-b342-09f4c191ed28"/>
+					<box topPadding="0" leftPadding="25">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Наркотики]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="180" y="0" width="192" height="10" uuid="4b1dccc9-5032-4774-987b-64da8a772801"/>
+					<box topPadding="0" leftPadding="5">
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement>
+						<font fontName="DejaVu Sans"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{f_drugs} == 1 ? "да" : "нет")]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</summary>
+</jasperReport>

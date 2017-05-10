@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
+<!-- 2017-03-06T12:08:18 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="anamnesis_allergy" language="groovy" pageWidth="760" pageHeight="802" whenNoDataType="NoDataSection" columnWidth="760" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="2541af2e-e69c-4287-b62e-e0f9e614b78a">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.11:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/anamnesis_files/anamnesis_allergy.jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/anamnesis"/>
+	<style name="table_header" hTextAlign="Center" vTextAlign="Middle" fontName="DejaVu Sans" fontSize="8" isBold="true"/>
+	<style name="table_cell" hTextAlign="Left" vTextAlign="Top" fontName="DejaVu Sans" fontSize="8" isBold="false"/>
+	<parameter name="client_id" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT
+'Аллергия' as `type`,
+ca.createDate as `date`,
+ca.nameSubstance as name,
+ca.power as `power`,
+ca.notes as notes
+FROM ClientAllergy ca
+WHERE ca.client_id = $P{client_id}
+AND ca.deleted = 0
+
+UNION ALL
+
+SELECT
+'Непереносимость' as `type`,
+intl.createDate as `date`,
+intl.nameMedicament as name,
+intl.power as `power`,
+intl.notes as notes
+FROM ClientIntoleranceMedicament intl
+WHERE intl.client_id = $P{client_id}
+AND intl.deleted = 0]]>
+	</queryString>
+	<field name="type" class="java.lang.String">
+		<fieldDescription><![CDATA[0-регистрации, 1-проживания]]></fieldDescription>
+	</field>
+	<field name="date" class="java.sql.Date">
+		<fieldDescription><![CDATA[Дата счета]]></fieldDescription>
+	</field>
+	<field name="name" class="java.lang.String">
+		<fieldDescription><![CDATA[Наименование действия]]></fieldDescription>
+	</field>
+	<field name="power" class="java.lang.Integer">
+		<fieldDescription><![CDATA[Степень непереносимости]]></fieldDescription>
+	</field>
+	<field name="notes" class="java.lang.String">
+		<fieldDescription><![CDATA[Примечания]]></fieldDescription>
+	</field>
+	<title>
+		<band height="10">
+			<staticText>
+				<reportElement style="table_header" x="160" y="0" width="250" height="10" uuid="677ec6fe-9ade-438b-b14a-fe4cdb20359d"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Наименование]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_header" x="410" y="0" width="90" height="10" uuid="16f6f21c-13da-48d0-af7b-7b274c0d47bd"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Степень]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_header" x="500" y="0" width="260" height="10" uuid="84bf266e-3d49-42a3-aafb-5eed661ccc63"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Примечания]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_header" x="0" y="0" width="160" height="10" uuid="1a1fdc49-33e2-4b05-835c-4a8fcb08313a"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Тип]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="10" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="table_cell" x="410" y="0" width="90" height="10" uuid="464a5cf7-9f28-4bd1-ae98-e5f66abb165b"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{power} == 0 ? "не известно" :
+  ($F{power} == 1 ? "малая" :
+    ($F{power} == 2 ? "средняя" :
+      ($F{power} == 3 ? "высокая" :
+        ($F{power} == 4 ? "строгая" : "")
+      )
+    )
+  )
+)]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="table_cell" x="160" y="0" width="250" height="10" uuid="92e4bbfc-4d1c-48f4-86a1-9c2457855a75"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="table_cell" x="0" y="0" width="160" height="10" uuid="921d70ba-9899-43b2-83f7-4030bf26d597"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{type}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement style="table_cell" x="500" y="0" width="260" height="10" uuid="bef7c6d7-b22c-4138-b7c9-08e04f1004ad"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{notes}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<noData>
+		<band height="10">
+			<staticText>
+				<reportElement style="table_header" x="0" y="0" width="760" height="10" uuid="b1b725bf-8e27-4f9f-9e6f-d447ca02e214"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[нет данных]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>

@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
+<!-- 2017-03-06T12:08:18 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="anamnesis_prev_preg" language="groovy" pageWidth="760" pageHeight="802" whenNoDataType="NoDataSection" columnWidth="760" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="1f341552-eba2-4f09-b362-291c404181f0">
+	<property name="ireport.zoom" value="3.797498335832422"/>
+	<property name="ireport.x" value="1676"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/anamnesis"/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.11:8080/jasperserver/"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/anamnesis_files/anamnesis_prev_preg.jrxml"/>
+	<subDataset name="mongo" uuid="77b0d1cc-b39f-4739-bf87-48ba38269c24">
+		<parameter name="code" class="java.lang.String" isForPrompting="false"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+				collectionName : $P{refbook},
+				findQuery : { code: $P{code} },
+				findFields : {
+					name: 1
+				},
+				rowsToProcess : 5,
+				limit : 1
+			}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+		<field name="shorttype" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="event_id" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="MONGODB_CONNECTION" class="java.sql.Connection"/>
+	<queryString>
+		<![CDATA[select
+year.value as year,
+pregnancyResult.value as pregnancyResult,
+note.value as note,
+preeclampsia.value as preeclampsia,
+pregnancy_week.value as pregnancy_week,
+pregnancy_pathology.diag_list as pregnancy_pathology,
+delivery_pathology.diag_list as delivery_pathology,
+maternity_aid.operation_list as maternity_aid,
+after_birth_complications.diag_list as after_birth_complications,
+card_number.value as card_number,
+operation_testimonials.value as operation_testimonials,
+a.id as action_id
+
+
+FROM Event e
+
+INNER JOIN `Action` a ON (
+        a.event_id = e.id
+        AND a.actionType_id IN (SELECT id FROM ActionType WHERE ActionType.flatCode = 'risar_anamnesis_pregnancy')
+        AND a.deleted = 0
+)
+
+
+
+-- Год
+LEFT JOIN ActionProperty_Integer year ON year.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'year'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+
+-- Исход беременности
+LEFT JOIN ActionProperty_ExtRef pregnancyResult ON pregnancyResult.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'pregnancyResult'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+
+-- Особенности беременности
+LEFT JOIN ActionProperty_String note ON note.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'note'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = a.id
+	LIMIT 1
+)
+
+-- Преэклампсия
+LEFT JOIN ActionProperty_Integer preeclampsia ON preeclampsia.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'preeclampsia'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+
+-- Срок беременности
+LEFT JOIN ActionProperty_Integer pregnancy_week ON pregnancy_week.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'pregnancy_week'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+
+-- Патологии беременности
+LEFT JOIN (
+	SELECT
+	GROUP_CONCAT(MKB.DiagID separator ", ") as diag_list,
+	_ap.action_id as action_id
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'pregnancy_pathology'
+	INNER JOIN ActionProperty_MKB _ap_v ON _ap_v.id = _ap.id
+	INNER JOIN MKB ON _ap_v.value = MKB.id
+	WHERE _ap.deleted = 0
+	GROUP BY _ap.action_id
+) as pregnancy_pathology ON pregnancy_pathology.action_id = a.id
+
+-- Патологии родов/абортов
+LEFT JOIN (
+	SELECT
+	GROUP_CONCAT(MKB.DiagID separator ", ") as diag_list,
+	_ap.action_id as action_id
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'delivery_pathology'
+	INNER JOIN ActionProperty_MKB _ap_v ON _ap_v.id = _ap.id
+	INNER JOIN MKB ON _ap_v.value = MKB.id
+	WHERE _ap.deleted = 0
+	GROUP BY _ap.action_id
+) as delivery_pathology ON delivery_pathology.action_id = a.id
+
+
+-- Пособия, операции
+LEFT JOIN (
+	SELECT
+	GROUP_CONCAT(_ap_v.value separator ",") as operation_list,
+	_ap.action_id as action_id
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'maternity_aid'
+	INNER JOIN ActionProperty_ExtRef _ap_v ON _ap_v.id = _ap.id
+	WHERE _ap.deleted = 0
+	GROUP BY _ap.action_id
+) as maternity_aid ON maternity_aid.action_id = a.id
+
+
+-- Осложнения после родов/абортов
+LEFT JOIN (
+	SELECT
+	GROUP_CONCAT(MKB.DiagID separator ", ") as diag_list,
+	_ap.action_id as action_id
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'after_birth_complications'
+	INNER JOIN ActionProperty_MKB _ap_v ON _ap_v.id = _ap.id
+	INNER JOIN MKB ON _ap_v.value = MKB.id
+	WHERE _ap.deleted = 0
+	GROUP BY _ap.action_id
+) as after_birth_complications ON after_birth_complications.action_id = a.id
+
+
+-- Номер карты
+LEFT JOIN ActionProperty_String card_number ON card_number.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'card_number'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = a.id
+	LIMIT 1
+)
+
+-- Показания к операции
+LEFT JOIN ActionProperty_ExtRef operation_testimonials ON operation_testimonials.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'operation_testimonials'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+
+
+WHERE e.id = $P{event_id}
+AND e.deleted = 0]]>
+	</queryString>
+	<field name="year" class="java.lang.Integer"/>
+	<field name="pregnancyResult" class="java.lang.String"/>
+	<field name="note" class="java.lang.String"/>
+	<field name="preeclampsia" class="java.lang.Integer"/>
+	<field name="pregnancy_week" class="java.lang.Integer"/>
+	<field name="pregnancy_pathology" class="java.lang.String"/>
+	<field name="delivery_pathology" class="java.lang.String"/>
+	<field name="maternity_aid" class="java.lang.String"/>
+	<field name="after_birth_complications" class="java.lang.String"/>
+	<field name="card_number" class="java.lang.String"/>
+	<field name="operation_testimonials" class="java.lang.String"/>
+	<field name="action_id" class="java.lang.Integer"/>
+	<variable name="op_testimonials" class="java.lang.String" resetType="None"/>
+	<variable name="m_aid" class="java.lang.String"/>
+	<title>
+		<band height="10" splitType="Stretch">
+			<staticText>
+				<reportElement x="40" y="0" width="120" height="10" uuid="b1c50c16-1ef6-4e69-b397-d29836e4034d"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Исход беременности]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="40" height="10" uuid="1b3f3158-b75a-430e-a270-eeb54bfdbfc8"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Год]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="0" width="260" height="10" uuid="440f5332-31ce-44a6-bbb3-fa2a2c356d52"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Особенности]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="0" width="300" height="10" uuid="b47ac0a4-747d-4f70-ab1a-1f62cbd81014"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Дети]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="160" y="0" width="40" height="10" uuid="7682217a-d05e-4d38-bb2b-23626ce4adfb"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Срок]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band>
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+		</band>
+		<band height="10" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="40" height="10" isPrintWhenDetailOverflows="true" uuid="92e09068-c995-4aed-9ee5-65a2c50feb6a">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box topPadding="0" leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{year}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="500" y="0" width="260" height="10" uuid="d947ff44-237e-4bf1-af04-f5e724b0eace"/>
+				<box topPadding="0" leftPadding="5">
+					<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Top" markup="html">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[String.join("<br>", Arrays.asList(
+	($F{preeclampsia} == 1 ? "<b>Была преэклампсия во время беременности</b>" : null),
+	($F{note} !="" && $F{note} != null ? "<b>Особенности:</b> " + $F{note} : null),
+	($F{pregnancy_pathology} !="" && $F{pregnancy_pathology} != null ? "<b>Патологии беременности:</b> " + $F{pregnancy_pathology} : null),
+	($F{delivery_pathology} !="" && $F{delivery_pathology} != null ? "<b>Патологии родов/абортов:</b> " + $F{delivery_pathology} : null),
+	($F{after_birth_complications} !="" && $F{after_birth_complications} != null ? "<b>Осложнения после родов/абортов:</b> " + $F{after_birth_complications} : null), 
+	($V{m_aid} !="" && $V{m_aid} != null ? "<b>Пособия, операции:</b> " + $V{m_aid} : null),
+	($V{op_testimonials} !="" && $V{op_testimonials} != null ? "<b>Показания к операции:</b> " + $V{op_testimonials} : null)
+).findAll())]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="160" y="0" width="40" height="10" isPrintWhenDetailOverflows="true" uuid="65b73332-8fa0-430b-8882-222fb5881c8c"/>
+				<box topPadding="0" leftPadding="5">
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pregnancy_week}]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement stretchType="RelativeToTallestObject" x="40" y="0" width="120" height="10" uuid="6617f467-6c50-465d-aef6-04f7cb661e67"/>
+				<box leftPadding="0">
+					<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<componentElement>
+					<reportElement key="" stretchType="RelativeToTallestObject" x="0" y="0" width="120" height="10" isPrintWhenDetailOverflows="true" uuid="e3f1c843-e3fb-40f7-a9a2-63a812606a44">
+						<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					</reportElement>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="db1f85e5-cec6-4070-90bb-92b5c97f3eba">
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook."+"rbRisarPregnancyResult"]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{pregnancyResult}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$P{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="120">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="120" height="10" isPrintWhenDetailOverflows="true" uuid="bd1a06cc-692f-421c-a927-ecb7c3fa02b3">
+									<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+								</reportElement>
+								<box topPadding="0" leftPadding="5">
+									<topPen lineWidth="0.0" lineStyle="Dashed" lineColor="#000000"/>
+									<leftPen lineWidth="0.0" lineStyle="Dashed" lineColor="#000000"/>
+									<bottomPen lineWidth="0.0" lineStyle="Dashed" lineColor="#000000"/>
+									<rightPen lineWidth="0.0" lineStyle="Dashed" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Top">
+									<font fontName="DejaVu Sans" size="8" isPdfEmbedded="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement stretchType="RelativeToTallestObject" x="200" y="0" width="300" height="10" uuid="52c59ecf-d216-4bc7-bd71-5240beef03cb"/>
+				<box>
+					<topPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.25" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<subreport>
+					<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="300" height="10" isPrintWhenDetailOverflows="true" uuid="e35d5f1a-0511-4990-98b0-3db8661f139d">
+						<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					</reportElement>
+					<subreportParameter name="action_id">
+						<subreportParameterExpression><![CDATA[$F{action_id}]]></subreportParameterExpression>
+					</subreportParameter>
+					<subreportParameter name="MONGODB_CONNECTION">
+						<subreportParameterExpression><![CDATA[$P{MONGODB_CONNECTION}]]></subreportParameterExpression>
+					</subreportParameter>
+					<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<subreportExpression><![CDATA["anamnesis_children.jrxml"]]></subreportExpression>
+				</subreport>
+			</frame>
+		</band>
+	</detail>
+	<noData>
+		<band height="10">
+			<staticText>
+				<reportElement x="0" y="0" width="760" height="10" uuid="898c740b-a6c4-4943-933a-706da676a037"/>
+				<box leftPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[нет данных]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>

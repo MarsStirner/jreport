@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
+<!-- 2017-03-06T12:08:18 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="anamnesis_children" language="groovy" pageWidth="300" pageHeight="802" whenNoDataType="NoDataSection" columnWidth="300" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="d1b7c7f8-891c-4651-b371-e894115243fc">
+	<property name="ireport.zoom" value="1.2100000000000002"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="hospital1_risar.xml"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.11:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/anamnesis_files/anamnesis_children.jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/anamnesis"/>
+	<parameter name="action_id" class="java.lang.String"/>
+	<parameter name="MONGODB_CONNECTION" class="java.sql.Connection"/>
+	<queryString>
+		<![CDATA[SELECT
+ch.alive,
+ch.sex,
+ch.weight,
+ch.abnormal_development,
+ch.neurological_disorders,
+ch.died_at_code,
+ch.death_reason
+
+FROM RisarPreviousPregnancy_Children ch
+WHERE ch.action_id = $P{action_id}]]>
+	</queryString>
+	<field name="alive" class="java.lang.Boolean"/>
+	<field name="sex" class="java.lang.Integer"/>
+	<field name="weight" class="java.lang.Integer"/>
+	<field name="abnormal_development" class="java.lang.Boolean"/>
+	<field name="neurological_disorders" class="java.lang.Boolean"/>
+	<field name="died_at_code" class="java.lang.String"/>
+	<field name="death_reason" class="java.lang.String"/>
+	<variable name="died_at" class="java.lang.String"/>
+	<title>
+		<band height="10">
+			<textField evaluationTime="Report">
+				<reportElement x="0" y="0" width="300" height="10" uuid="db058178-b8ba-495a-8892-9779acebaa38">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box leftPadding="0"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Всего детей " + $V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<subreport>
+				<reportElement mode="Transparent" x="0" y="0" width="0" height="0" backcolor="#FFFFFF" uuid="cc0b3234-6d80-4b87-96e3-af8c74eeca19">
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<subreportParameter name="code">
+					<subreportParameterExpression><![CDATA[$F{died_at_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="refbook">
+					<subreportParameterExpression><![CDATA["refbook.rbRisarDiedAt"]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{MONGODB_CONNECTION}]]></connectionExpression>
+				<returnValue subreportVariable="return_var" toVariable="died_at"/>
+				<subreportExpression><![CDATA["anamnesis_children_spec.jrxml"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="10" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="300" height="10" uuid="3e2ebf76-f098-4415-9237-f84771638eeb"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0">
+					<topPen lineWidth="0.25"/>
+				</box>
+				<textElement markup="html">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Ребенок " + $V{REPORT_COUNT} + "</b>  "
++
+($F{alive} == true ? "Живой, " : "Мертвый, ")
++ 
+($F{sex} == 1 ? "Мальчик" :
+	($F{sex} == 2 ? "Девочка" : "пол не указан")
+)
++
+($F{weight} != null ? "<br><b>Вес:</b> " + $F{weight} : "")
++
+($F{abnormal_development} == true  ? "<br><b>Аномалии развития</b>" : "")
++
+($F{neurological_disorders} == true ? "<br><b>Неврологические нарушения</b>" : "")
++
+($F{death_reason} !="" && $F{death_reason} != null ? "<br><b>Причина смерти:</b> " + $F{death_reason}: "")
++
+($V{died_at}!="" && $V{died_at} != null ? "<br><b>Умер в срок: </b> " + $V{died_at}: "")]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<noData>
+		<band height="10" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<staticText>
+				<reportElement x="0" y="0" width="300" height="10" uuid="7ef05a00-ceab-4790-b401-175494efe917"/>
+				<box leftPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[нет]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>
