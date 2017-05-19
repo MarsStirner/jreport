@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
+<!-- 2017-05-19T14:20:04 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="anamnesis" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="0" isIgnorePagination="true" uuid="daf016b6-d321-4403-a87e-1b0c25c0f104">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="10.1.2.11_hospital1_risar"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/anamnesis"/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.13:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.zoom" value="0.8264462809917484"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/anamnesis_files/anamnesis_jrxml"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<style name="step_header" hTextAlign="Center" vTextAlign="Bottom" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<subDataset name="mongo" uuid="5aa144dc-4adc-480d-a666-213acadfaf29">
+		<parameter name="code" class="java.lang.String" isForPrompting="false"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+	collectionName : $P{refbook},
+	findQuery : { code: $P{code} },
+	findFields : {
+		name: 1
+	},
+	rowsToProcess : 5,
+	limit : 1
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+		<field name="shorttype" class="java.lang.String"/>
+	</subDataset>
+	<subDataset name="multipleCodes" uuid="b9b2b36a-6a98-4f0d-b376-85910996cc8a">
+		<parameter name="codes" class="java.lang.String[]"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<parameter name="title" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+	collectionName : $P{refbook},
+	findQuery : { code: { $in: [$P!{codes}] }},
+	findFields : {
+		name: 1
+	},
+	rowsToProcess : 5
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="event_id" class="java.lang.String" isForPrompting="false">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA[233]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_host" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["10.1.2.11"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_port" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["27017"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_dbname" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["nvesta"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_user" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_pw" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+  CONCAT_WS (" ", clnt.lastName, clnt.firstName, clnt.patrName) AS FIO,
+  evt.externalId AS card_num,
+  an_father.id as an_father,
+  an_mother.id as an_mother,
+  clnt.id as client_id
+
+
+FROM Event evt
+LEFT JOIN Client clnt ON evt.client_id = clnt.id AND clnt.deleted = 0
+
+LEFT JOIN `Action` an_father ON (
+        an_father.event_id = evt.id AND
+        an_father.actionType_id IN (SELECT id FROM ActionType WHERE ActionType.flatCode = 'risar_father_anamnesis') AND
+        an_father.deleted = 0
+)
+
+LEFT JOIN `Action` an_mother ON (
+        an_mother.event_id = evt.id AND
+        an_mother.actionType_id IN (SELECT id FROM ActionType WHERE ActionType.flatCode = 'risar_mother_anamnesis') AND
+        an_mother.deleted = 0
+)
+
+WHERE evt.id = $P{event_id}
+AND evt.deleted = 0]]>
+	</queryString>
+	<field name="FIO" class="java.lang.String"/>
+	<field name="card_num" class="java.lang.String"/>
+	<field name="an_father" class="java.lang.Integer"/>
+	<field name="an_mother" class="java.lang.Integer"/>
+	<field name="client_id" class="java.lang.Integer"/>
+	<variable name="MONGODB_CONNECTION" class="java.sql.Connection">
+		<variableExpression><![CDATA[$V{MONGODB_CONNECTION}]]></variableExpression>
+		<initialValueExpression><![CDATA[new com.jaspersoft.mongodb.connection.MongoDbConnection("mongodb://"+$P{mongo_host}+":"+$P{mongo_port}+"/"+$P{mongo_dbname}, $P{mongo_user}, $P{mongo_pw})]]></initialValueExpression>
+	</variable>
+	<summary>
+		<band height="208">
+			<textField isStretchWithOverflow="true">
+				<reportElement key="" x="0" y="0" width="802" height="20" uuid="c58c3aa1-46ae-4d84-bbd3-1711901fb254">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["АНАМНЕЗ - " +$F{FIO} + ", карта № " + $F{card_num}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="step_header" x="20" y="24" width="378" height="16" uuid="d0d5f982-e5fb-488c-adb6-42fe2b4a88ee"/>
+				<textElement textAlignment="Center" markup="none">
+					<font fontName="DejaVu Sans" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Сведения о женщине" +
+($F{an_mother} == null ? " не заполнены" : "")]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="step_header" x="430" y="24" width="372" height="16" uuid="b214a30d-9a5e-43ad-b5ac-76430793ef9e"/>
+				<textElement textAlignment="Center" markup="none">
+					<font fontName="DejaVu Sans" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Сведения об отце ребенка" +
+($F{an_father} == null ? " не заполнены" : "")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="step_header" positionType="Float" x="0" y="72" width="802" height="16" uuid="f22f5f37-038f-4493-b2a3-c515b007dddf"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Исходы предыдущих беременностей]]></text>
+			</staticText>
+			<subreport>
+				<reportElement positionType="Float" x="20" y="88" width="760" height="10" isRemoveLineWhenBlank="true" uuid="5346cbc8-bb98-4b34-b457-2f70e157a38e">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<subreportParameter name="event_id">
+					<subreportParameterExpression><![CDATA[$P{event_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="MONGODB_CONNECTION">
+					<subreportParameterExpression><![CDATA[$V{MONGODB_CONNECTION}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["anamnesis_prev_preg.jrxml"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement style="step_header" positionType="Float" x="0" y="120" width="802" height="16" uuid="615b71bb-e7f7-449d-b82d-62f48a7392af"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Переливания крови]]></text>
+			</staticText>
+			<subreport>
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="20" y="136" width="760" height="20" uuid="bc9cc4e7-7a8c-4367-b376-e1ba058b3ad1"/>
+				<subreportParameter name="event_id">
+					<subreportParameterExpression><![CDATA[$P{event_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="MONGODB_CONNECTION">
+					<subreportParameterExpression><![CDATA[$V{MONGODB_CONNECTION}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["anamnesis_blood.jrxml"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement style="step_header" positionType="Float" x="0" y="168" width="802" height="16" uuid="c56d2e1d-3076-4804-9a9b-301bfe9df736"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Аллергии и непереносимости]]></text>
+			</staticText>
+			<subreport>
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="20" y="184" width="760" height="20" uuid="5d27f6ff-8264-469e-bc42-cc8b97dccb49"/>
+				<subreportParameter name="client_id">
+					<subreportParameterExpression><![CDATA[$F{client_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["anamnesis_allergy.jrxml"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="20" y="40" width="378" height="21" uuid="545973bc-addb-48f3-93cf-cfc62127f4f0">
+					<printWhenExpression><![CDATA[$F{an_mother} != null]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="event_id">
+					<subreportParameterExpression><![CDATA[$P{event_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="MONGODB_CONNECTION">
+					<subreportParameterExpression><![CDATA[$V{MONGODB_CONNECTION}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["anamnesis_mother.jrxml"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="430" y="40" width="372" height="21" uuid="cdbb382e-702a-4d94-ad44-67de51310b72">
+					<printWhenExpression><![CDATA[$F{an_father} != null]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="event_id">
+					<subreportParameterExpression><![CDATA[$P{event_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="MONGODB_CONNECTION">
+					<subreportParameterExpression><![CDATA[$V{MONGODB_CONNECTION}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["anamnesis_father.jrxml"]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

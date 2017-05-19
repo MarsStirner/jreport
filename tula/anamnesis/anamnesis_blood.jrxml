@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
+<!-- 2017-05-19T12:08:01 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="anamnesis_blood" language="groovy" pageWidth="760" pageHeight="200" whenNoDataType="NoDataSection" columnWidth="760" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b4b9908b-51ee-4340-b6ea-96854685a1f8">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="ireport.jasperserver.url" value="http://10.1.2.13:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/anamnesis_gynecological_files/anamnesis_blood.jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/anamnesis_gynecological"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<style name="table_header" hTextAlign="Center" vTextAlign="Middle" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<style name="table_cell" hTextAlign="Center" vTextAlign="Top" fontName="DejaVu Sans" fontSize="10" isBold="false"/>
+	<subDataset name="mongo" uuid="9a056475-37d6-4cb9-98bf-1a9ebce1f0d1">
+		<parameter name="code" class="java.lang.String" isForPrompting="false"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+				collectionName : $P{refbook},
+				findQuery : { code: $P{code} },
+				findFields : {
+					name: 1
+				},
+				rowsToProcess : 5,
+				limit : 1
+			}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+		<field name="shorttype" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="event_id" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="MONGODB_CONNECTION" class="java.sql.Connection"/>
+	<queryString>
+		<![CDATA[select
+`year`.value as `year`,
+type.value as type,
+reaction.value as reaction
+
+
+FROM Event e
+
+INNER JOIN `Action` a ON (
+        a.event_id = e.id
+        AND a.actionType_id IN (SELECT id FROM ActionType WHERE ActionType.flatCode = 'risar_anamnesis_transfusion')
+        AND a.deleted = 0
+)
+
+-- Год трансфузии
+LEFT JOIN ActionProperty_Integer `year` ON `year`.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'year'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = a.id
+	LIMIT 1
+)
+
+-- Наименование компонента крови
+LEFT JOIN ActionProperty_ExtRef type ON type.id = (
+  SELECT MAX(_ap.id)
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'type'
+  WHERE _ap.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+
+-- Реакция
+LEFT JOIN ActionProperty_String reaction ON reaction.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.deleted = 0 AND _apt.code = 'reaction'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = a.id
+	LIMIT 1
+)
+
+WHERE e.id = $P{event_id}
+AND e.deleted = 0]]>
+	</queryString>
+	<field name="year" class="java.lang.Integer"/>
+	<field name="type" class="java.lang.String"/>
+	<field name="reaction" class="java.lang.String"/>
+	<title>
+		<band height="12">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<staticText>
+				<reportElement style="table_header" x="40" y="0" width="429" height="12" uuid="5610b99e-830c-400d-89ca-2737064412b6">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Вид]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_header" x="0" y="0" width="40" height="12" uuid="f1fbfff0-2e85-495e-8e47-d87b83feeea4">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Год]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table_header" x="469" y="0" width="291" height="12" uuid="c53f3115-c232-4265-9082-ca85f52087c9">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Реакция]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<textField isBlankWhenNull="true">
+				<reportElement style="table_cell" x="469" y="0" width="291" height="12" uuid="58c6f901-e44c-4086-833f-c2523ecf4f21">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box leftPadding="5">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{reaction}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement style="table_cell" x="0" y="0" width="40" height="12" uuid="ba7e915f-75c6-4f9d-8e05-2174a7a12951">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<box leftPadding="0">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{year}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="40" y="0" width="429" height="12" uuid="592d98ed-087a-489a-bf75-4dfb648b6a16">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="mongo" uuid="aaf0181b-b33d-4509-b110-35fb91b74e10">
+						<datasetParameter name="refbook">
+							<datasetParameterExpression><![CDATA["refbook."+"rbRisarBloodTransfusionType"]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="code">
+							<datasetParameterExpression><![CDATA[$F{type}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{MONGODB_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:listContents height="12" width="429">
+						<textField isBlankWhenNull="true">
+							<reportElement style="table_cell" x="0" y="0" width="429" height="12" uuid="92f4abd3-dcbe-4ca9-aab5-7c2fbf33736c">
+								<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+							</reportElement>
+							<box leftPadding="5">
+								<pen lineWidth="0.25"/>
+								<topPen lineWidth="0.25"/>
+								<leftPen lineWidth="0.25"/>
+								<bottomPen lineWidth="0.25"/>
+								<rightPen lineWidth="0.25"/>
+							</box>
+							<textElement textAlignment="Left" verticalAlignment="Middle">
+								<font fontName="DejaVu Sans"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+						</textField>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+		</band>
+	</detail>
+	<noData>
+		<band height="12">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<staticText>
+				<reportElement style="table_header" x="0" y="0" width="760" height="12" uuid="c5e3e14d-9133-4178-87d6-291348568e7b">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[нет данных]]></text>
+			</staticText>
+		</band>
+	</noData>
+</jasperReport>
