@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
-<!-- 2017-05-22T14:51:23 -->
+<!-- 2017-05-22T16:23:39 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="first_checkup_subreport" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="83cfd67f-91ae-4ee3-8cef-f9629d974f44">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -1330,7 +1330,7 @@ LIMIT 1]]>
 			<frame>
 				<reportElement positionType="Float" x="0" y="80" width="555" height="10" isRemoveLineWhenBlank="true" uuid="21c88615-90d5-41cb-84e0-f7d4ab230371">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
-					<printWhenExpression><![CDATA[$F{notes} != null && $F{notes} != ""]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{treatment} != null && $F{treatment} != ""]]></printWhenExpression>
 				</reportElement>
 				<staticText>
 					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="99968170-3e4e-400c-a683-e1be2c4311c2"/>
