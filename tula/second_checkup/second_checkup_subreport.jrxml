@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
-<!-- 2017-04-26T20:27:02 -->
+<!-- 2017-05-22T14:51:23 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="first_checkup_subreport" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="83cfd67f-91ae-4ee3-8cef-f9629d974f44">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bin\hospital1_risar.xml"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -17,6 +16,7 @@
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/second_checkup_files/main_jrxml"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Risar/second_checkup"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="10.1.2.13_risar"/>
 	<style name="left_col" hTextAlign="Left" hImageAlign="Right" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8" isBold="true"/>
 	<style name="right_col" hTextAlign="Left" hImageAlign="Left" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8">
 		<paragraph leftIndent="0"/>
@@ -150,6 +150,7 @@ pregnancy_continuation.value as pregnancy_continuation, -- Возможност�
 pregnancy_continuation_refusal.value as pregnancy_continuation_refusal, -- Отказ от прерывания
 craft.value as craft,
 next_date.value as next_date, -- Плановая дата следующей явки
+treatment.value as treatment, -- Лечение
 notes.value as notes, -- Примечания
 recommendations.value as recommendations, -- Рекомендации
 doctor.lastName as doctorLastName, -- Ф доктора
@@ -227,6 +228,16 @@ LEFT JOIN ActionProperty_String cervix_free_input ON cervix_free_input.id= (
   INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'cervix_free_input'
   WHERE _ap.deleted = 0
     AND _apt.deleted = 0
+  AND _ap.action_id = a.id
+  LIMIT 1
+)
+-- Лечение
+LEFT JOIN ActionProperty_String treatment ON treatment.id= (
+  SELECT _ap.id
+  FROM ActionProperty _ap
+  INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'treatment'
+  WHERE _ap.deleted = 0
+  AND _apt.deleted = 0
   AND _ap.action_id = a.id
   LIMIT 1
 )
@@ -515,6 +526,7 @@ LIMIT 1]]>
 	<field name="pregnancy_continuation_refusal" class="java.lang.Integer"/>
 	<field name="craft" class="java.lang.String"/>
 	<field name="next_date" class="java.sql.Date"/>
+	<field name="treatment" class="java.lang.String"/>
 	<field name="notes" class="java.lang.String"/>
 	<field name="recommendations" class="java.lang.String"/>
 	<field name="doctorLastName" class="java.lang.String"/>
@@ -1142,7 +1154,7 @@ LIMIT 1]]>
 				<text><![CDATA[Заключение]]></text>
 			</staticText>
 		</band>
-		<band height="110" splitType="Immediate">
+		<band height="120" splitType="Immediate">
 			<frame>
 				<reportElement positionType="Float" x="0" y="30" width="555" height="10" isRemoveLineWhenBlank="true" uuid="525a06a8-58e3-43a1-bf6e-c2f5bad37ac7">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
@@ -1186,7 +1198,7 @@ LIMIT 1]]>
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" x="0" y="80" width="555" height="10" isRemoveLineWhenBlank="true" uuid="de5863b8-dbda-4888-bb40-58f78952e2ec">
+				<reportElement positionType="Float" x="0" y="90" width="555" height="10" isRemoveLineWhenBlank="true" uuid="de5863b8-dbda-4888-bb40-58f78952e2ec">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 					<printWhenExpression><![CDATA[$F{notes} != null && $F{notes} != ""]]></printWhenExpression>
 				</reportElement>
@@ -1201,7 +1213,7 @@ LIMIT 1]]>
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" x="0" y="100" width="555" height="10" isRemoveLineWhenBlank="true" uuid="9dcfa1d2-ff69-4863-93e2-6c917f0ed76a">
+				<reportElement positionType="Float" x="0" y="110" width="555" height="10" isRemoveLineWhenBlank="true" uuid="9dcfa1d2-ff69-4863-93e2-6c917f0ed76a">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 					<printWhenExpression><![CDATA[$F{doctorFirstName} != null || $F{doctorLastName}  != null || $F{doctorPatrName} != null]]></printWhenExpression>
 				</reportElement>
@@ -1265,7 +1277,7 @@ LIMIT 1]]>
 				</textField>
 			</frame>
 			<frame>
-				<reportElement positionType="Float" x="0" y="90" width="555" height="10" isRemoveLineWhenBlank="true" uuid="d521f0f0-9dd9-4974-82d8-e516208cc08a">
+				<reportElement positionType="Float" x="0" y="100" width="555" height="10" isRemoveLineWhenBlank="true" uuid="d521f0f0-9dd9-4974-82d8-e516208cc08a">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 					<printWhenExpression><![CDATA[$F{recommendations}  != null &&  $F{recommendations} != ""]]></printWhenExpression>
 				</reportElement>
@@ -1315,6 +1327,21 @@ LIMIT 1]]>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["diag_subreport.jrxml"]]></subreportExpression>
 			</subreport>
+			<frame>
+				<reportElement positionType="Float" x="0" y="80" width="555" height="10" isRemoveLineWhenBlank="true" uuid="21c88615-90d5-41cb-84e0-f7d4ab230371">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{notes} != null && $F{notes} != ""]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="99968170-3e4e-400c-a683-e1be2c4311c2"/>
+					<text><![CDATA[Лечение:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="8a0bde71-51d6-4409-a8ea-a23420faad7d"/>
+					<textElement markup="html"/>
+					<textFieldExpression><![CDATA[$F{treatment}]]></textFieldExpression>
+				</textField>
+			</frame>
 		</band>
 	</detail>
 </jasperReport>
