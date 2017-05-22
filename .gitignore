@@ -26,6 +26,8 @@ thumbs.db
 
 # Folders to ignore
 
+# Archives (import-export)
+*.zip
 
 # Jasper compilled reports
 *.jasper
