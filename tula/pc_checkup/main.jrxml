@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
-<!-- 2017-03-20T15:18:16 -->
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
+<!-- 2017-05-22T15:02:06 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="pc_jrxml" language="groovy" pageWidth="595" pageHeight="868" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="0" uuid="f917b959-4408-4652-893d-bb6d5c60f459">
 	<property name="ireport.zoom" value="1.7715610000000013"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="10.1.2.13"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="10.1.2.13_risar"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="ireport.jasperserver.url" value="http://10.1.2.13:8080/jasperserver/"/>
@@ -352,10 +352,10 @@ LIMIT 1]]>
 	</subDataset>
 	<parameter name="action_id" class="java.lang.Integer" isForPrompting="false">
 		<parameterDescription><![CDATA[]]></parameterDescription>
-		<defaultValueExpression><![CDATA[4744]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA[4749]]></defaultValueExpression>
 	</parameter>
 	<parameter name="mongo_host" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["10.1.2.11"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["10.1.2.13"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="mongo_port" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["27017"]]></defaultValueExpression>
@@ -2161,7 +2161,7 @@ $F{regFreeInput}]]></textFieldExpression>
 					<subreportParameterExpression><![CDATA[$P{mongo_user}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["repo:pc_sub.jrxml"]]></subreportExpression>
+				<subreportExpression><![CDATA["pc_sub.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 	</detail>

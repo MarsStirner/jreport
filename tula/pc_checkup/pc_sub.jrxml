@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
-<!-- 2017-03-20T15:18:15 -->
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
+<!-- 2017-05-22T15:01:58 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="pc_sub" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="83cfd67f-91ae-4ee3-8cef-f9629d974f44">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bin\hospital1_risar.xml"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
@@ -1069,7 +1069,7 @@ LIMIT 1]]>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<returnValue subreportVariable="anyFetus" toVariable="anyFetus"/>
-				<subreportExpression><![CDATA["repo:second_fetus_subreport.jrxml"]]></subreportExpression>
+				<subreportExpression><![CDATA["second_fetus_subreport.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 		<band height="12" splitType="Immediate">
@@ -1096,7 +1096,7 @@ LIMIT 1]]>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<returnValue subreportVariable="REPORT_COUNT" toVariable="diag_cnt_1"/>
-				<subreportExpression><![CDATA["repo:diag_subreport.jrxml"]]></subreportExpression>
+				<subreportExpression><![CDATA["diag_subreport.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 		<band height="10" splitType="Immediate">
@@ -1107,7 +1107,7 @@ LIMIT 1]]>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<returnValue subreportVariable="REPORT_COUNT" toVariable="diag_cnt_2"/>
-				<subreportExpression><![CDATA["repo:diag_subreport_associated.jrxml"]]></subreportExpression>
+				<subreportExpression><![CDATA["diag_subreport_associated.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 		<band height="10" splitType="Immediate">
