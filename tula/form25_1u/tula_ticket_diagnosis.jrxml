@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
+<!-- 2017-05-25T15:57:28 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="tula_ticket_diagnosis" language="groovy" pageWidth="555" pageHeight="802" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="43ac8853-d962-4242-b082-358570c798fe">
 	<property name="ireport.zoom" value="1.464100000000001"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Analytics/tula_ticket"/>
 	<property name="ireport.jasperserver.url" value="http://192.168.228.165:8080/jasperserver/services/repository"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="10.1.2.13_risar"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="action_id" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
@@ -15,8 +19,7 @@ IF (Diag.diagnosis_description is not null, Diag.diagnosis_description, MainMKB.
 Diag.MKB2,
 ReasonMKB.DiagName as MKB2description,
 rbDiseaseCharacter.code as CharacterCode,
-rbTraumaType.regionalCode as TraumaCode,
-rbAcheResult.regionalCode as result
+rbTraumaType.regionalCode as TraumaCode
 
 
 FROM Diagnostic as Diag
@@ -84,27 +87,19 @@ ON Diag.character_id = rbDiseaseCharacter.id
 LEFT JOIN rbTraumaType
 ON Diag.traumaType_id = rbTraumaType.id
 
-LEFT JOIN rbAcheResult
-ON Diag.rbAcheResult_id = rbAcheResult.id
-
 WHERE DiagKindCode = 'main']]>
 	</queryString>
-	<field name="MKB" class="java.lang.String">
-		<fieldDescription><![CDATA[]]></fieldDescription>
-	</field>
+	<field name="MKB" class="java.lang.String"/>
 	<field name="MKBdescription" class="java.lang.String"/>
-	<field name="MKB2" class="java.lang.String">
-		<fieldDescription><![CDATA[Второй код МКБ]]></fieldDescription>
-	</field>
+	<field name="MKB2" class="java.lang.String"/>
 	<field name="MKB2description" class="java.lang.String"/>
 	<field name="CharacterCode" class="java.lang.String"/>
 	<field name="TraumaCode" class="java.lang.String"/>
-	<field name="result" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<summary>
-		<band height="465" splitType="Stretch">
+		<band height="297" splitType="Stretch">
 			<staticText>
 				<reportElement x="455" y="220" width="40" height="12" uuid="10ef0b06-6728-4174-b182-860319c5b4ba"/>
 				<box>
@@ -1848,67 +1843,6 @@ WHERE DiagKindCode = 'main']]>
 					<font fontName="DejaVu Sans" size="6"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{MKBdescription}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="379" y="453" width="80" height="12" uuid="a7db0418-c169-4b64-ba4c-54e7f605fb26"/>
-				<textElement verticalAlignment="Bottom" markup="html">
-					<font fontName="DejaVu Sans" size="6" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($F{result}=="303" ? "<b><u>": "")+
-"<b>303</b> - улучшение"+
-($F{result}=="303" ? "</u></b>": "")]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="365" y="417" width="190" height="12" uuid="12047eb0-6737-49eb-8ce7-fb190123d616"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom">
-					<font fontName="DejaVu Sans" size="6" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Исход заболевания:]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="379" y="441" width="80" height="12" uuid="3fbca6ef-30cc-4170-9243-66a679426bb1"/>
-				<textElement verticalAlignment="Bottom" markup="html">
-					<font fontName="DejaVu Sans" size="6" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($F{result}=="302" ? "<b><u>": "")+
-"<b>302</b> - ремиссия"+
-($F{result}=="302" ? "</u></b>": "")]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="459" y="453" width="96" height="12" uuid="27634bec-5ff0-4eb5-a290-07918c517a34"/>
-				<textElement verticalAlignment="Bottom" markup="html">
-					<font fontName="DejaVu Sans" size="6" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($F{result}=="306" ? "<b><u>": "")+
-"<b>306</b> - осмотр"+
-($F{result}=="306" ? "</u></b>": "")]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="459" y="441" width="96" height="12" uuid="ac371d02-9467-4c15-914b-87a5d34c8437"/>
-				<textElement verticalAlignment="Bottom" markup="html">
-					<font fontName="DejaVu Sans" size="6" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($F{result}=="305" ? "<b><u>": "")+
-"<b>305</b> - ухудшение"+
-($F{result}=="305" ? "</u></b>": "")]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="459" y="429" width="96" height="12" uuid="c5171898-5746-41d7-8fe5-fe56181b4b40"/>
-				<textElement verticalAlignment="Bottom" markup="html">
-					<font fontName="DejaVu Sans" size="6" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($F{result}=="304" ? "<b><u>": "")+
-"<b>304</b> - без перемен"+
-($F{result}=="304" ? "</u></b>": "")]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="379" y="429" width="80" height="12" uuid="6848ee60-0377-4e31-bb87-de6c92907864"/>
-				<textElement verticalAlignment="Bottom" markup="html">
-					<font fontName="DejaVu Sans" size="6" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($F{result}=="301" ? "<b><u>": "")+
-"<b>301</b> - выздоровление"+
-($F{result}=="301" ? "</u></b>": "")]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>

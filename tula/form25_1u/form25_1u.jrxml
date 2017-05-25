@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.2  -->
-<!-- 2017-05-25T14:14:28 -->
+<!-- 2017-05-25T16:01:09 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="tula_ticket" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c0948f50-90d4-4d1b-8e75-ed586a5c0773">
 	<property name="ireport.zoom" value="1.4641000000001043"/>
 	<property name="ireport.x" value="24"/>
@@ -9,6 +9,8 @@
 	<property name="ireport.jasperserver.url" value="http://10.1.2.11:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/Hippocrates/Risar/form25_1u_files/Main_Jrxml"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="10.1.2.13_risar"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<subDataset name="kladrInfoDataset" uuid="7b9101f6-9aa2-41e9-80e8-6ac6798e7794">
 		<parameter name="kladr" class="java.lang.String"/>
 		<queryString language="MongoDbQuery">
@@ -99,6 +101,7 @@ finished_treatment.value AS finishedTreatment,
 initial_treatment.value AS initialTreatment,
 visit_type.value AS visitType,
 rbResult.regionalCode AS treatmentResult,
+rbAcheResult.regionalCode AS acheResult,
 urgent.value AS urgent,
 payment.regionalCode AS payment,
 source_action.begDate as examinationDate,
@@ -247,6 +250,20 @@ LEFT JOIN ActionProperty_Integer treatment_result ON treatment_result.id = (
 )
 LEFT JOIN rbResult ON rbResult.id = treatment_result.value
 
+
+-- Исход заболевания
+LEFT JOIN ActionProperty_Integer ache_result ON ache_result.id = (
+	SELECT MAX(_ap.id)
+	FROM ActionProperty _ap
+	INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id AND _apt.code = 'ache_result'
+	WHERE _ap.deleted = 0
+	AND _ap.action_id = a.id
+	LIMIT 1
+)
+LEFT JOIN rbAcheResult ON rbAcheResult.id = ache_result.value
+
+
+
 LEFT JOIN Person doctor ON source_action.createPerson_id = doctor.id
 
 -- Неотложная помощь
@@ -324,9 +341,7 @@ LIMIT 1]]>
 	</queryString>
 	<field name="ticketNumber" class="java.lang.Integer"/>
 	<field name="startDate" class="java.sql.Timestamp"/>
-	<field name="endDate" class="java.sql.Timestamp">
-		<fieldDescription><![CDATA[Дата окончания работы]]></fieldDescription>
-	</field>
+	<field name="endDate" class="java.sql.Timestamp"/>
 	<field name="actionEndDate" class="java.sql.Timestamp"/>
 	<field name="policyType" class="java.lang.String"/>
 	<field name="policySerial" class="java.lang.String"/>
@@ -355,6 +370,7 @@ LIMIT 1]]>
 	<field name="initialTreatment" class="java.lang.String"/>
 	<field name="visitType" class="java.lang.String"/>
 	<field name="treatmentResult" class="java.lang.String"/>
+	<field name="acheResult" class="java.lang.String"/>
 	<field name="urgent" class="java.lang.Integer"/>
 	<field name="payment" class="java.lang.String"/>
 	<field name="examinationDate" class="java.sql.Timestamp"/>
@@ -3886,7 +3902,9 @@ new SimpleDateFormat("dd.MM.yyyy").format($F{benefitEndDate})]]></textFieldExpre
 		</band>
 		<band height="802">
 			<subreport>
-				<reportElement x="0" y="285" width="555" height="465" uuid="912e1f11-93f5-4f01-913a-4698df4daff6"/>
+				<reportElement x="0" y="285" width="555" height="302" uuid="912e1f11-93f5-4f01-913a-4698df4daff6">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
 				<subreportParameter name="action_id">
 					<subreportParameterExpression><![CDATA[$P{action_id}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -6854,6 +6872,67 @@ new SimpleDateFormat("dd.MM.yyyy").format($F{benefitEndDate})]]></textFieldExpre
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["repo:tula_ticket_sickleave.jrxml"]]></subreportExpression>
 			</subreport>
+			<staticText>
+				<reportElement x="365" y="702" width="190" height="12" uuid="92bb7f69-6374-4708-9ee2-781ca9af4d0d"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Исход заболевания:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="379" y="714" width="80" height="12" uuid="05e5d462-ea56-438b-a85f-898a0d3b59c9"/>
+				<textElement verticalAlignment="Bottom" markup="html">
+					<font fontName="DejaVu Sans" size="6" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{acheResult}=="301" ? "<b><u>": "")+
+"<b>301</b> - выздоровление"+
+($F{acheResult}=="301" ? "</u></b>": "")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="379" y="726" width="80" height="12" uuid="c3d4a4f1-6cc5-4c31-acfa-3f485d799537"/>
+				<textElement verticalAlignment="Bottom" markup="html">
+					<font fontName="DejaVu Sans" size="6" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{acheResult}=="302" ? "<b><u>": "")+
+"<b>302</b> - ремиссия"+
+($F{acheResult}=="302" ? "</u></b>": "")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="379" y="738" width="80" height="12" uuid="2bd7d71e-2f64-462f-8bd6-6eb4751ca94d"/>
+				<textElement verticalAlignment="Bottom" markup="html">
+					<font fontName="DejaVu Sans" size="6" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{acheResult}=="303" ? "<b><u>": "")+
+"<b>303</b> - улучшение"+
+($F{acheResult}=="303" ? "</u></b>": "")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="459" y="714" width="96" height="12" uuid="3de19af1-22ee-44b9-bc81-042313324888"/>
+				<textElement verticalAlignment="Bottom" markup="html">
+					<font fontName="DejaVu Sans" size="6" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{acheResult}=="304" ? "<b><u>": "")+
+"<b>304</b> - без перемен"+
+($F{acheResult}=="304" ? "</u></b>": "")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="459" y="726" width="96" height="12" uuid="61f273d9-1ac1-4e83-ade9-fe2f3d4f9cf3"/>
+				<textElement verticalAlignment="Bottom" markup="html">
+					<font fontName="DejaVu Sans" size="6" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{acheResult}=="305" ? "<b><u>": "")+
+"<b>305</b> - ухудшение"+
+($F{acheResult}=="305" ? "</u></b>": "")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="459" y="738" width="96" height="12" uuid="cb40fa3a-7715-4506-9715-c29e9517960d"/>
+				<textElement verticalAlignment="Bottom" markup="html">
+					<font fontName="DejaVu Sans" size="6" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{acheResult}=="306" ? "<b><u>": "")+
+"<b>306</b> - осмотр"+
+($F{acheResult}=="306" ? "</u></b>": "")]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 </jasperReport>
