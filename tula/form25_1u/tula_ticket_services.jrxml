@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="tula_ticket_services" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4d82c5a2-3337-4b85-a3fc-48fc43d1b67e">
+	<property name="ireport.zoom" value="1.3310000000000004"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Analytics/form25_1u"/>
+	<property name="ireport.jasperserver.url" value="http://192.168.228.165:8080/jasperserver/services/repository"/>
+	<parameter name="action_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="examinationDate" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\ekonyaev\\Desktop\\Рисар\\Jasper\\tula_ticket\\files upload 2\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="visitPlace" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT  ap_v.value AS jsonString
+FROM ActionProperty ap
+INNER JOIN ActionPropertyType apt ON apt.id = ap.type_id
+INNER JOIN ActionProperty_String ap_v ON ap_v.id = ap.id
+WHERE ap.deleted = 0
+AND apt.deleted = 0
+AND apt.code = 'services'
+AND ap.action_id = $P{action_id}
+UNION
+SELECT '{}' as jsonString
+LIMIT 6]]>
+	</queryString>
+	<field name="jsonString" class="java.lang.String"/>
+	<variable name="jsonObject" class="org.json.JSONObject">
+		<variableExpression><![CDATA[new org.json.JSONObject($F{jsonString})]]></variableExpression>
+	</variable>
+	<variable name="service" class="org.json.JSONObject">
+		<variableExpression><![CDATA[$V{jsonObject} != null && $V{jsonObject}.has("service") ? ((org.json.JSONObject)$V{jsonObject}).get("service") : null]]></variableExpression>
+	</variable>
+	<variable name="person" class="org.json.JSONObject">
+		<variableExpression><![CDATA[$V{jsonObject} != null && $V{jsonObject}.has("person") ? ((org.json.JSONObject)$V{jsonObject}).get("person") : null]]></variableExpression>
+	</variable>
+	<variable name="personSpeciality" class="org.json.JSONObject">
+		<variableExpression><![CDATA[$V{person} != null && $V{person}.has("speciality") ? ((org.json.JSONObject)$V{person}).get("speciality") : null]]></variableExpression>
+	</variable>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="350" y="0" width="96" height="12" uuid="2fb3ad1d-aa28-4200-886c-461d93df499d"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{person}.get("name")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="163" y="0" width="117" height="12" uuid="6ffcceb4-a63d-4ce7-93e6-6ef69ad334ce"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="297" y="0" width="53" height="12" uuid="926ad855-1604-4694-93f0-5a0547fabe27"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="446" y="0" width="109" height="12" uuid="9ff2bfb5-6e78-4238-9927-da4ad1f96de4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="57" y="0" width="106" height="12" uuid="de19b699-9f25-4fcd-b267-680ca0914a29"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{service} != null && $V{service}.has("code") ?  $V{service}.get("code") : null]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="57" height="12" uuid="d68d402c-7466-46e2-8921-1cfdcb7ed6c1"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{service} != null ? $P{examinationDate} : ""]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="280" y="0" width="17" height="12" uuid="9dbace9e-cc6f-4d29-8226-1787365fcdae"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{service} != null ? $P{visitPlace} : ""]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="297" y="0" width="53" height="12" uuid="693e036b-b8db-45f8-8dfc-8da062cbc9f5"/>
+				<subreportParameter name="person_id">
+					<subreportParameterExpression><![CDATA[$V{person} != null && $V{person}.has("id") ?  $V{person}.get("id") : null]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["repo:tula_ticket_doctor.jrxml"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

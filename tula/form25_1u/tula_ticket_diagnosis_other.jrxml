@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="tula_ticket_diagnosis_other" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="7f81503d-1106-47e1-8946-533250293853">
+	<property name="ireport.zoom" value="1.331000000000001"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="action_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+Diag.MKB,
+IF (Diag.diagnosis_description is not null, Diag.diagnosis_description, MainMKB.DiagName) as MKBdescription,
+rbDiseaseCharacter.code as CharacterCode
+
+
+FROM Diagnostic as Diag
+inner join (
+    select Diagnostic_sorted.sid, max(Diagnostic_sorted.createDatetime) as latest, DiagKindCode
+    from (SELECT Diagnostic.id as sid, Diagnosis.id as did, Diagnostic.createDatetime, rbDiagnosisKind.code as DiagKindCode
+
+        FROM Action AS SourceAction
+        INNER JOIN Event
+        ON SourceAction.event_id = Event.id
+        INNER JOIN Client
+        ON Event.client_id = Client.id
+        INNER JOIN Diagnosis
+        ON Diagnosis.client_id = Client.id
+
+        LEFT JOIN Event_Diagnosis
+        ON Event_Diagnosis.event_id = Event.id and Event_Diagnosis.diagnosis_id = Diagnosis.id
+        AND Event_Diagnosis.deleted = 0
+
+        LEFT JOIN rbDiagnosisKind
+        ON Event_Diagnosis.diagnosisKind_id = rbDiagnosisKind.id
+
+        INNER JOIN Diagnostic
+        ON Diagnostic.diagnosis_id = Diagnosis.id
+        AND Diagnosis.client_id = Client.id
+        AND IF(SourceAction.endDate is not null, Diagnostic.createDatetime <= SourceAction.endDate AND Diagnosis.setDate <= SourceAction.endDate, TRUE)
+        AND (Diagnosis.endDate is null or Diagnosis.endDate >= SourceAction.begDate)
+
+        WHERE SourceAction.id = (
+                SELECT _ap.action_id
+                FROM ActionProperty_Integer _ap_v
+                INNER JOIN ActionProperty _ap ON _ap.id = _ap_v.id
+                INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id
+                -- ID Action 25 талона
+                WHERE _ap_v.value = $P{action_id}
+                --
+                AND _apt.code = 'ticket_25'
+                AND _ap.deleted = 0
+               LIMIT 1
+        )
+
+        AND SourceAction.deleted = 0
+        AND Event.deleted = 0
+        AND Client.deleted = 0
+        AND Diagnosis.deleted = 0
+        AND Diagnostic.deleted = 0
+
+
+        -- магическая строка для сортировки внутри группы:
+        ORDER BY Diagnosis.id, Diagnostic.createDatetime DESC
+    ) as Diagnostic_sorted
+    group by Diagnostic_sorted.did
+) as inDiag
+ON Diag.createDatetime = inDiag.latest and Diag.id = inDiag.sid
+
+LEFT JOIN MKB AS MainMKB
+ON Diag.MKB = MainMKB.DiagID
+
+LEFT JOIN rbDiseaseCharacter
+ON Diag.character_id = rbDiseaseCharacter.id
+
+WHERE DiagKindCode is null or DiagKindCode != "main"
+LIMIT 4]]>
+	</queryString>
+	<field name="MKB" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="MKBdescription" class="java.lang.String"/>
+	<field name="CharacterCode" class="java.lang.String"/>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<staticText>
+				<reportElement x="455" y="0" width="40" height="12" uuid="2d3d76f9-2036-460c-97ba-9bcc78a088b2"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="515" y="0" width="20" height="12" uuid="f44c55f7-00eb-4ed0-afa9-429fd8dddfbe"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="405" y="0" width="50" height="12" uuid="cc9c97d7-5851-4424-aa9e-d2df7102e4ee"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MKB}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="405" height="12" uuid="e6d5f027-5879-4bfa-97b1-1a76a157d894"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MKBdescription}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="535" y="0" width="20" height="12" uuid="76767c01-799d-4517-8294-7488af98f512"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="495" y="0" width="20" height="12" uuid="89ad3d58-44d1-45d4-a256-7e518bbfef1c"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{CharacterCode} == "1" ? "1": "")+
+($F{CharacterCode} == "2" ? "3": "")+
+($F{CharacterCode} == "3" ? "2": "")]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

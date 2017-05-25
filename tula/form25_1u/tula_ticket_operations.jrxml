@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="tula_ticket_operations" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="2f2e3644-a7c5-404c-9e5a-30c8955f0e11">
+	<property name="ireport.zoom" value="1.4641000000000013"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Analytics/form25_1u"/>
+	<property name="ireport.jasperserver.url" value="http://192.168.228.165:8080/jasperserver/services/repository"/>
+	<parameter name="action_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="examinationDate" class="java.lang.String"/>
+	<parameter name="visitPlace" class="java.lang.String"/>
+	<parameter name="payment" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT  ap_v.value AS jsonString
+FROM ActionProperty ap
+INNER JOIN ActionPropertyType apt ON apt.id = ap.type_id
+INNER JOIN ActionProperty_String ap_v ON ap_v.id = ap.id
+WHERE ap.deleted = 0
+AND apt.deleted = 0
+AND apt.code = 'operations'
+AND ap.action_id = $P{action_id}]]>
+	</queryString>
+	<field name="jsonString" class="java.lang.String"/>
+	<variable name="jsonObject" class="org.json.JSONObject">
+		<variableExpression><![CDATA[new org.json.JSONObject($F{jsonString})]]></variableExpression>
+	</variable>
+	<variable name="equipment" class="java.lang.String">
+		<variableExpression><![CDATA[$V{jsonObject} != null && $V{jsonObject}.has("equipment") ? (((org.json.JSONObject) $V{jsonObject}.get("equipment")).has("code") ?  ((org.json.JSONObject)$V{jsonObject}.get("equipment")).getString("code") : null ): null]]></variableExpression>
+	</variable>
+	<variable name="anesthetization" class="java.lang.String">
+		<variableExpression><![CDATA[$V{jsonObject} != null && $V{jsonObject}.has("anesthetization") ? (((org.json.JSONObject) $V{jsonObject}.get("anesthetization")).has("code") ?  ((org.json.JSONObject)$V{jsonObject}.get("anesthetization")).getString("code") : null ): null]]></variableExpression>
+	</variable>
+	<variable name="service" class="org.json.JSONObject">
+		<variableExpression><![CDATA[$V{jsonObject} != null && $V{jsonObject}.has("service") ? $V{jsonObject}.get("service") : null]]></variableExpression>
+	</variable>
+	<variable name="person" class="org.json.JSONObject">
+		<variableExpression><![CDATA[$V{jsonObject} != null && $V{jsonObject}.has("person") ? $V{jsonObject}.get("person") : null]]></variableExpression>
+	</variable>
+	<variable name="personSpeciality" class="org.json.JSONObject">
+		<variableExpression><![CDATA[$V{person} != null && $V{person}.has("speciality") ? $V{person}.get("speciality") : null]]></variableExpression>
+	</variable>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement x="531" y="0" width="12" height="12" uuid="b58f9007-284a-4143-941b-9cc5061cd9ba"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{payment}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="100" y="0" width="36" height="12" uuid="792dce02-6d63-444f-bfe6-2d1b72b2d6ad"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="47" y="0" width="53" height="12" uuid="d5755a7a-49a7-4888-90b0-0b54d4d5ea6f"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="419" y="0" width="52" height="12" uuid="1c9e1808-90ef-4928-8162-ec308bb1d1f1"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="288" y="0" width="50" height="12" uuid="b3affd3a-6bf7-4d4c-bd1e-45e4acbc77ec"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{service} != null && $V{service}.has("code") ? $V{service}.get("code") : null]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="136" y="0" width="152" height="12" uuid="40dcfb43-49e5-4ad8-864a-7c3ff41ebe44"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{service} != null && $V{service}.has("name") ? $V{service}.get("name") : null]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="543" y="0" width="12" height="12" uuid="3894fc13-d625-431e-8118-763c8d669bde"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{visitPlace} == "1" || $P{visitPlace} == "2" ? $P{visitPlace} : "")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="338" y="0" width="81" height="12" uuid="108df929-19a0-4e48-a103-9aa9ff514d59"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="519" y="0" width="12" height="12" uuid="a02b89fc-a769-4482-85d4-c6da4994f9d3"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($V{equipment}=="4" ? "*" : "")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="495" y="0" width="12" height="12" uuid="39d20b52-27cd-4345-982d-9440f8b3de83"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($V{equipment}=="1" ? "*" : "")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="471" y="0" width="12" height="12" uuid="72f4b355-d3a3-411b-be94-a04ed28d8a24"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($V{anesthetization}=="1" ? "1" : ($V{anesthetization}=="2" ? "2" : ""))]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="47" height="12" uuid="765ed714-2d5d-45a7-b983-8a024973dd48"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{examinationDate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="507" y="0" width="12" height="12" uuid="0ae959db-82f8-4689-9d77-c0ae890374bd"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($V{equipment}=="2" ? "*" : "")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="483" y="0" width="12" height="12" uuid="13e47f21-a4ad-4c5e-8b6f-77f38b724fa9"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($V{equipment}=="3" ? "*" : "")]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="47" y="0" width="53" height="12" uuid="b568987d-c098-432e-9775-2607a9411bda"/>
+				<subreportParameter name="person_id">
+					<subreportParameterExpression><![CDATA[$V{person} != null && $V{person}.has("id") ? $V{person}.get("id") : null]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["repo:tula_ticket_doctor.jrxml"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

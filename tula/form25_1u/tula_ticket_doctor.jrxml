@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="tula_ticket_diagnosis" language="groovy" pageWidth="53" pageHeight="12" whenNoDataType="AllSectionsNoDetail" columnWidth="53" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="43ac8853-d962-4242-b082-358570c798fe">
+	<property name="ireport.zoom" value="1.2100000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Analytics/tula_ticket"/>
+	<property name="ireport.jasperserver.url" value="http://192.168.228.165:8080/jasperserver/services/repository"/>
+	<parameter name="person_id" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT p.regionalCode
+FROM Person p
+WHERE p.id = $P{person_id}]]>
+	</queryString>
+	<field name="regionalCode" class="java.lang.String">
+		<fieldDescription><![CDATA[Какой-то региональный код]]></fieldDescription>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="12" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="53" height="12" uuid="ab2c8adc-9b0c-4987-a928-26499cc27d80"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{regionalCode}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

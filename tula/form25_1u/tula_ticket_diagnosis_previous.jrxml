@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="tula_ticket_diagnosis" language="groovy" pageWidth="555" pageHeight="802" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="43ac8853-d962-4242-b082-358570c798fe">
+	<property name="ireport.zoom" value="1.3310000000000008"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Hippocrates/Analytics/tula_ticket"/>
+	<property name="ireport.jasperserver.url" value="http://192.168.228.165:8080/jasperserver/services/repository"/>
+	<parameter name="action_id" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+Diag.MKB,
+IF (Diag.diagnosis_description is not null, Diag.diagnosis_description, MainMKB.DiagName) as MKBdescription,
+hg.code as healthGroup
+
+
+FROM Diagnostic as Diag
+inner join (
+    select Diagnostic_sorted.sid, max(Diagnostic_sorted.createDatetime) as latest, DiagKindCode
+    from (SELECT Diagnostic.id as sid, Diagnosis.id as did, Diagnostic.createDatetime, rbDiagnosisKind.code as DiagKindCode
+
+        FROM Action AS SourceAction
+        INNER JOIN Event
+        ON SourceAction.event_id = Event.id
+        INNER JOIN Client
+        ON Event.client_id = Client.id
+        INNER JOIN Diagnosis
+        ON Diagnosis.client_id = Client.id
+
+        LEFT JOIN Event_Diagnosis
+        ON Event_Diagnosis.event_id = Event.id and Event_Diagnosis.diagnosis_id = Diagnosis.id
+        AND Event_Diagnosis.deleted = 0
+
+        LEFT JOIN rbDiagnosisKind
+        ON Event_Diagnosis.diagnosisKind_id = rbDiagnosisKind.id
+
+        INNER JOIN Diagnostic
+        ON Diagnostic.diagnosis_id = Diagnosis.id
+        AND Diagnosis.client_id = Client.id
+        AND IF(SourceAction.endDate is not null, Diagnostic.createDatetime <= SourceAction.endDate AND Diagnosis.setDate <= SourceAction.endDate, TRUE)
+        AND (Diagnosis.endDate is null or Diagnosis.endDate >= SourceAction.begDate)
+
+        WHERE SourceAction.id = (
+                SELECT _ap.action_id
+                FROM ActionProperty_Integer _ap_v
+                INNER JOIN ActionProperty _ap ON _ap.id = _ap_v.id
+                INNER JOIN ActionPropertyType _apt ON _apt.id = _ap.type_id
+                -- ID Action 25 талона
+                WHERE _ap_v.value = $P{action_id}
+                --
+                AND _apt.code = 'ticket_25'
+                AND _ap.deleted = 0
+               LIMIT 1
+        )
+
+        AND SourceAction.deleted = 0
+        AND Event.deleted = 0
+        AND Client.deleted = 0
+        AND Diagnosis.deleted = 0
+        AND Diagnostic.deleted = 0
+
+
+        -- магическая строка для сортировки внутри группы:
+        ORDER BY Diagnosis.id, Diagnostic.createDatetime DESC
+    ) as Diagnostic_sorted
+    group by Diagnostic_sorted.did
+) as inDiag
+ON Diag.createDatetime = inDiag.latest and Diag.id = inDiag.sid
+
+LEFT JOIN MKB AS MainMKB
+ON Diag.MKB = MainMKB.DiagID
+
+LEFT JOIN rbHealthGroup hg
+ON hg.id = Diag.healthGroup_id
+
+
+WHERE DiagKindCode = 'main']]>
+	</queryString>
+	<field name="MKB" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="MKBdescription" class="java.lang.String"/>
+	<field name="healthGroup" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="154" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="491" y="142" width="64" height="12" uuid="b87bc5d7-dfae-41d4-8bf8-d7d420875b73"/>
+				<box>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MKB}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="109" y="130" width="446" height="12" uuid="ce407f01-474a-4c2c-ad4f-a6d242072337"/>
+				<box>
+					<bottomPen lineWidth="0.25"/>
+				</box>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="DejaVu Sans" size="6"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MKBdescription}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="365" y="12" width="82" height="12" uuid="19b691d9-383c-440b-9a71-167103d1d651"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom" markup="html">
+					<font fontName="DejaVu Sans" size="6" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{healthGroup}=="1" ? "<u><b>":"")+
+"1"+
+($F{healthGroup}=="1" ? "</u></b>":"")+
+"&nbsp;&nbsp;&nbsp;&nbsp; "+
+
+($F{healthGroup}=="2" ? "<u><b>":"")+
+"2"+
+($F{healthGroup}=="2" ? "</u></b>":"")+
+"&nbsp;&nbsp;&nbsp;&nbsp; "+
+
+($F{healthGroup}=="3" ? "<u><b>":"")+
+"3"+
+($F{healthGroup}=="3" ? "</u></b>":"")+
+"&nbsp;&nbsp;&nbsp;&nbsp; "+
+
+($F{healthGroup}=="4" ? "<u><b>":"")+
+"4"+
+($F{healthGroup}=="4" ? "</u></b>":"")+
+"&nbsp;&nbsp;&nbsp;&nbsp; "+
+
+($F{healthGroup}=="5" ? "<u><b>":"")+
+"5"+
+($F{healthGroup}=="5" ? "</u></b>":"")]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>
