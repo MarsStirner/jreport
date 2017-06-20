@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.2.2.final using JasperReports Library version 6.2.1  -->
+<!-- 2017-03-03T15:04:06 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="multiCodes" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="12db17e2-1a56-40a9-aca6-4620bd3c9383">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="bin\hospital1_risar.xml"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="left_col" hTextAlign="Left" hImageAlign="Right" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8" isBold="true"/>
+	<style name="right_col" hTextAlign="Left" hImageAlign="Left" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8">
+		<paragraph leftIndent="0"/>
+	</style>
+	<style name="left_col_common" hTextAlign="Left" hImageAlign="Right" vTextAlign="Top" vImageAlign="Middle" fontName="DejaVu Sans" fontSize="8" isBold="false"/>
+	<style name="step_header" hTextAlign="Center" vTextAlign="Bottom" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<subDataset name="mongo" uuid="2226c9c8-4580-4b8e-926d-5a051a9dc6f2">
+		<parameter name="code" class="java.lang.String" isForPrompting="false"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<parameter name="codes" class="java.lang.String"/>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+	collectionName : $P{refbook},
+	findQuery : { code: $P{code} },
+	findFields : {
+		name: 1
+	},
+	rowsToProcess : 5,
+	limit : 1
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+		<field name="shorttype" class="java.lang.String"/>
+		<variable name="name" class="java.lang.String">
+			<variableExpression><![CDATA[$F{name}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="multipleCodes" uuid="4efb7dff-f431-46b6-9dca-d51ad97e2994">
+		<parameter name="codes" class="java.lang.String[]"/>
+		<parameter name="refbook" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<parameter name="title" class="java.lang.String" isForPrompting="false">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString language="MongoDbQuery">
+			<![CDATA[{
+	collectionName : $P{refbook},
+	findQuery : { code: { $in: [$P!{codes}] }},
+	findFields : {
+		name: 1
+	},
+	rowsToProcess : 5
+}]]>
+		</queryString>
+		<field name="name" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="action_id" class="java.lang.Integer" isForPrompting="false">
+		<defaultValueExpression><![CDATA[9577]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_host" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["10.1.2.11"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_port" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["27017"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_dbname" class="java.lang.String" isForPrompting="false">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["nvesta"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_user" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mongo_pw" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+fetus.position_code as position_code,
+fetus.position_2_code as position_2_code,
+fetus.type_code as type_code, -- Вид {rbRisarFetus_Type}
+fetus.presenting_part_code as presenting_part_code, -- Предлежащая часть {rbRisarPresenting_Part}
+heartbeats.heartbeat_code as heartbeat_code, -- Сердцебиение плода
+fetus.heart_rate as fetus_heart_rate
+
+FROM Action a
+LEFT JOIN RisarFetusState fetus on fetus.action_id = a.id
+LEFT JOIN (
+  SELECT fetus_state_id, GROUP_CONCAT(DISTINCT heartbeat_code) as heartbeat_code 
+  FROM RisarFetusState_heartbeats
+  GROUP BY fetus_state_id) heartbeats ON heartbeats.fetus_state_id = fetus.id
+
+WHERE
+a.deleted = 0
+AND a.id = $P{action_id}]]>
+	</queryString>
+	<field name="position_code" class="java.lang.String"/>
+	<field name="position_2_code" class="java.lang.String"/>
+	<field name="type_code" class="java.lang.String"/>
+	<field name="presenting_part_code" class="java.lang.String"/>
+	<field name="heartbeat_code" class="java.lang.String"/>
+	<field name="fetus_heart_rate" class="java.lang.Integer"/>
+	<variable name="MONGODB_CONNECTION" class="java.sql.Connection">
+		<variableExpression><![CDATA[$V{MONGODB_CONNECTION}]]></variableExpression>
+		<initialValueExpression><![CDATA[new com.jaspersoft.mongodb.connection.MongoDbConnection("mongodb://"+$P{mongo_host}+":"+$P{mongo_port}+"/"+$P{mongo_dbname}, $P{mongo_user}, $P{mongo_pw})]]></initialValueExpression>
+	</variable>
+	<detail>
+		<band height="82" splitType="Immediate">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<textField>
+				<reportElement style="step_header" x="0" y="0" width="555" height="12" isRemoveLineWhenBlank="true" uuid="74895dea-f641-403e-a7ac-f96d826f0ddb">
+					<printWhenExpression><![CDATA[$F{position_code} != null || $F{position_2_code} != null || $F{type_code} != null || $F{heartbeat_code} != null || ($F{fetus_heart_rate} != null && java.lang.String.valueOf($F{fetus_heart_rate}) != "")]]></printWhenExpression>
+				</reportElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT} == 1 ? "Данные плода" : ""]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement positionType="Float" x="0" y="12" width="555" height="10" isRemoveLineWhenBlank="true" uuid="1e47b7be-b9f2-428e-b91c-a800f9795974">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+					<printWhenExpression><![CDATA[$F{position_code} != null || $F{position_2_code} != null || $F{type_code} != null || $F{heartbeat_code} != null || ($F{fetus_heart_rate} != null && java.lang.String.valueOf($F{fetus_heart_rate}) != "")]]></printWhenExpression>
+				</reportElement>
+				<textField>
+					<reportElement style="left_col" x="0" y="0" width="197" height="10" uuid="0b84f817-e6a4-47c2-950c-c5020350eca5"/>
+					<textFieldExpression><![CDATA["Плод" + ($V{REPORT_COUNT} == 1 ? "" : " " + java.lang.String.valueOf($V{REPORT_COUNT})) + ":"]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="22" width="555" height="10" isRemoveLineWhenBlank="true" uuid="2cc22ca0-9d83-4367-8e7a-322e00e1c7a0">
+					<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{position_code} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="0e8e81aa-6e37-4dc3-acf0-1a1dc693f1cd"/>
+					<text><![CDATA[положение:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" x="197" y="0" width="358" height="10" uuid="4f740529-bb53-4acd-8f4a-43e3b3be88fa"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="19765054-711b-45e7-b073-b8dee9af6ac2">
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{position_code}]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarFetus_Position"]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="03256aa7-3d42-411b-a8ac-933675a3b7e9"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="32" width="555" height="10" isRemoveLineWhenBlank="true" uuid="2a40107f-d337-46c7-b534-1dd466f8cde4">
+					<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{position_2_code} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="289af991-a996-4633-8d9d-e89edf5ac6ef"/>
+					<text><![CDATA[позиция:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" x="197" y="0" width="358" height="10" uuid="cae392ff-e41c-4027-8ec8-5b4825686728"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="5756f57d-981f-4f1a-95dc-275a9fb22e83">
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{position_2_code}]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarFetus_Position_2"]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="d0180330-ffff-4979-ae1d-a3e69b5c46dc"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="42" width="555" height="10" isRemoveLineWhenBlank="true" uuid="09036c20-ef80-464f-ac6c-3cb7073f5ce9">
+					<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{type_code} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="662f580f-21d4-4eb0-8128-4ed23f34c5a5"/>
+					<text><![CDATA[вид:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" x="197" y="0" width="358" height="10" uuid="08764f29-ecd6-4239-8137-27cef3619a56"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="cc22b8bb-09df-468c-8ec3-309671a61651">
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{type_code}]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarFetus_Type"]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="56438898-691b-4871-b75a-c7543025eb1d"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="52" width="555" height="10" isRemoveLineWhenBlank="true" uuid="37a25904-1a9d-4d5b-becb-6609891eda74">
+					<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{presenting_part_code} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="083cdcf3-dad2-47c3-a5ae-bd4017eeb33e"/>
+					<text><![CDATA[предлежание:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" x="197" y="0" width="358" height="10" uuid="95080a22-c04d-4baf-bf15-5065207a52dc"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="mongo" uuid="f09f87f5-9476-4aed-90c1-2f438be81690">
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarPresenting_Part"]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="code">
+								<datasetParameterExpression><![CDATA[$F{presenting_part_code}]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="2b438d95-7003-4ec2-a324-2f7ce7117ebd"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="62" width="555" height="10" isRemoveLineWhenBlank="true" uuid="d47531c3-3cc8-4d18-bb09-3c67c14f4bf9">
+					<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{heartbeat_code} != null]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="6d8c9385-719d-49ee-8ba3-6c21eb8498e8"/>
+					<text><![CDATA[сердцебиение:]]></text>
+				</staticText>
+				<componentElement>
+					<reportElement style="right_col" x="197" y="0" width="358" height="10" uuid="d33b795d-4955-4eb2-9962-be5b97eba239"/>
+					<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+						<datasetRun subDataset="multipleCodes" uuid="ce0468c3-1c3e-40d2-8844-78df2da6c310">
+							<datasetParameter name="refbook">
+								<datasetParameterExpression><![CDATA["refbook.rbRisarFetus_Heartbeat"]]></datasetParameterExpression>
+							</datasetParameter>
+							<datasetParameter name="codes">
+								<datasetParameterExpression><![CDATA["\""+$F{heartbeat_code}.replace(",", "\",\"")+"\""]]></datasetParameterExpression>
+							</datasetParameter>
+							<connectionExpression><![CDATA[$V{MONGODB_CONNECTION}]]></connectionExpression>
+						</datasetRun>
+						<jr:listContents height="10" width="358">
+							<textField>
+								<reportElement style="right_col" x="0" y="0" width="357" height="10" uuid="7a21b53a-66b3-47b7-a618-7010e546ce9c"/>
+								<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+							</textField>
+						</jr:listContents>
+					</jr:list>
+				</componentElement>
+			</frame>
+			<frame>
+				<reportElement positionType="Float" x="0" y="72" width="555" height="10" isRemoveLineWhenBlank="true" uuid="ed26617d-c177-4c46-b384-05b54b206aa0">
+					<property name="com.jaspersoft.layout.grid.x" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.y" value="-1"/>
+					<property name="com.jaspersoft.layout.grid.weight.x" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.weight.y" value="1.0"/>
+					<property name="com.jaspersoft.layout.grid.rowspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.colspan" value="1"/>
+					<property name="com.jaspersoft.layout.grid.weight.fixed" value="true"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<printWhenExpression><![CDATA[$F{fetus_heart_rate} != null && java.lang.String.valueOf($F{fetus_heart_rate}) != ""]]></printWhenExpression>
+				</reportElement>
+				<staticText>
+					<reportElement style="left_col_common" positionType="Float" x="0" y="0" width="197" height="10" isRemoveLineWhenBlank="true" uuid="45c7c1e1-c41e-4483-9fde-d9a54166d41f"/>
+					<text><![CDATA[ЧСС:]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement style="right_col" positionType="Float" x="197" y="0" width="358" height="10" isRemoveLineWhenBlank="true" uuid="b0328fb2-14a2-4443-9e5d-a370bb222017"/>
+					<textFieldExpression><![CDATA[$F{fetus_heart_rate}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+</jasperReport>
